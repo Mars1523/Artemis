@@ -4,10 +4,13 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.commands.DefaultSwerve;
+import frc.robot.commands.autos.AutoRotate;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 
 public class RobotContainer {
@@ -15,9 +18,17 @@ public class RobotContainer {
     SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     DefaultSwerve defaultSwerve = new DefaultSwerve(primaryJoy.getHID(), swerveDriveSubsystem);
 
+    SendableChooser<Command> autoChooser = AutoBuilder.buildAutoChooser();
+
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
+        configureAutos();
         configureBindings();
+    }
+
+    private void configureAutos() {
+        autoChooser.addOption("Rotate", new AutoRotate(swerveDriveSubsystem, 45, 0.1));
+        Shuffleboard.getTab("auto").add(autoChooser);
     }
 
     private void configureBindings() {
@@ -25,6 +36,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.none();
+        return autoChooser.getSelected();
     }
 }

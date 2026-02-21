@@ -1,10 +1,16 @@
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -65,6 +71,67 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         // read about skew:
         // https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964
         swerveDrive.setAngularVelocityCompensation(true, true, 0.1);
+
+        initializeAuto();
+    }
+
+    /**
+     * Initializes callbacks needed for Autos
+     * code copied here: https://pathplanner.dev/pplib-build-an-auto.html#configure-autobuilder
+     */
+    private void initializeAuto() {
+        RobotConfig config;
+        try {
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        // Configure AutoBuilder last
+        AutoBuilder.configure(
+                this::getPose, // Robot pose supplier
+                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+                this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                (speeds, feedforwards) -> {
+                    swerveDrive.drive(
+                            speeds, swerveDrive.kinematics.toSwerveModuleStates(speeds), feedforwards.linearForces());
+                }, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs
+                // individual module feedforwards
+                new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for
+                        // holonomic drive trains
+                        new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                        new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                        ),
+                config, // The robot configuration
+                () -> {
+                    // Boolean supplier that controls when the path will be mirrored for the red alliance
+                    // This will flip the path being followed to the red side of the field.
+                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                    }
+                    return false;
+                },
+                this // Reference to this subsystem to set requirements
+                );
+    }
+
+    public Pose2d getPose() {
+        return swerveDrive.getPose();
+    }
+
+    public void resetPose(Pose2d pose) {
+        swerveDrive.resetOdometry(pose);
+    }
+
+    public ChassisSpeeds getRobotRelativeSpeeds() {
+        return swerveDrive.getRobotVelocity();
+    }
+
+    public Rotation2d getOdometryHeading() {
+        return swerveDrive.getOdometryHeading();
     }
 
     /**
@@ -87,6 +154,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         // `isOpenLoop=false` makes the drive motors set velocity using motor pid loops
         swerveDrive.drive(chassisSpeeds, false, new Translation2d());
+    }
+
+    public void drive(double xPercent, double yPercent, double rotPercent, boolean fieldRelative) {
+        var xSpeed = xRateLimiter.calculate(xPercent) * Constants.SwerveDriveConstants.kMaxVelocityMetersPerSecond;
+        var ySpeed = yRateLimiter.calculate(yPercent) * Constants.SwerveDriveConstants.kMaxVelocityMetersPerSecond;
+        var rotationSpeed = rotRateLimiter.calculate(rotPercent)
+                * Constants.SwerveDriveConstants.kMaxAngularVelocityRadiansPerSecond;
+
+        swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, fieldRelative, false);
     }
 
     /**
