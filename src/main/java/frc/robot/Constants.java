@@ -55,7 +55,7 @@ public final class Constants {
                 new Transform3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d(0, camPitch, 0));
 
         public static final AprilTagFieldLayout kTagLayout =
-                AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+                AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
         public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
@@ -77,7 +77,6 @@ public final class Constants {
     }
 
     public static final ModuleConfiguration ModuleType = SdsModuleConfigurations.MK4N_L2;
-
     public static void configMotor(SparkMax motor, boolean Inverted) {}
 
     public static final class DriveConstants {

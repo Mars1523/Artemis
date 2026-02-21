@@ -9,12 +9,20 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.io.File;
 import java.io.IOException;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
@@ -69,6 +77,59 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         // read about skew:
         // https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964
         swerveDrive.setAngularVelocityCompensation(true, true, 0.1);
+    
+        RobotConfig config;
+        try {
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        // Configure AutoBuilder last
+        boolean enableFeedforward = true;
+        AutoBuilder.configure(this::getPose, // Robot pose supplier
+                this::resetOmetry, // Method to reset odometry (will be called if your auto has a
+                                   // starting pose)
+                this::getRobotVelocity, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                (speedsRobotRelative, moduleFeedForwards) -> {
+                    if (enableFeedforward) {
+                        swerveDrive.drive(speedsRobotRelative,
+                                swerveDrive.kinematics.toSwerveModuleStates(
+                                        speedsRobotRelative),
+                                moduleFeedForwards.linearForces());
+                    } else {
+                        swerveDrive.setChassisSpeeds(speedsRobotRelative);
+                    }
+
+                    // var swerveModuleStates = DriveConstants.kinematics.toSwerveModuleStates(
+                    // ChassisSpeeds.discretize(speeds, .02));
+                    // driveStates(swerveModuleStates);
+                }, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+                new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely
+                                                // live
+                                                // in your
+                                                // Constants class
+                        new PIDConstants(5, 0.0, 0.0), // Translation PID constants
+                        new PIDConstants(3, 0.0, 0.0) // Rotation PID constants
+                // Max module speed, in m/s // Drive base radius in meters. Distance from robot
+                // center to
+                // furthest module.
+                // Default path replanning config. See the API
+                // for the options here
+                ), config, () -> {
+                    // Boolean supplier that controls when the path will be mirrored for the red
+                    // alliance
+                    // This will flip the path being followed to the red side of the field.
+                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                    }
+                    return false;
+                }, this // Reference to this subsystem to set requirements
+        );
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     /**
@@ -91,6 +152,19 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         // `isOpenLoop=false` makes the drive motors set velocity using motor pid loops
         swerveDrive.drive(chassisSpeeds, false, new Translation2d());
+    }
+
+    public void drive(double xPercent, double yPercent, double rotPercent,
+            boolean fieldRelative) {
+        var xSpeed = xRateLimiter.calculate(xPercent)
+                * Constants.DriveConstants.MaxVelocityMetersPerSecond;
+        var ySpeed = yRateLimiter.calculate(yPercent)
+                * Constants.DriveConstants.MaxVelocityMetersPerSecond;
+        var rot = rotRateLimiter.calculate(rotPercent)
+                * Constants.DriveConstants.MaxAngularVelocityRadiansPerSecond;
+
+        swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rot, fieldRelative,
+                false);
     }
 
     /**
