@@ -1,15 +1,19 @@
 package frc.robot.subsystems;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -87,24 +91,43 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        // Configure AutoBuilder last
+        // Configure AutoBuilder las
+        boolean enableFeedforward = true;
         AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
-                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                (speeds, feedforwards) -> {
-                    swerveDrive.drive(
-                            speeds, swerveDrive.kinematics.toSwerveModuleStates(speeds), feedforwards.linearForces());
-                }, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs
-                // individual module feedforwards
-                new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for
-                        // holonomic drive trains
-                        new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                        new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                this::resetOdometry, // Method to reset odometry (will be called if your auto has a
+                // starting pose)
+                this::getRobotVelocity, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                (speedsRobotRelative, moduleFeedForwards) -> {
+                    if (enableFeedforward) {
+                        swerveDrive.drive(
+                                speedsRobotRelative,
+                                swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                                moduleFeedForwards.linearForces());
+                    } else {
+                        swerveDrive.setChassisSpeeds(speedsRobotRelative);
+                    }
+
+                    // var swerveModuleStates = DriveConstants.kinematics.toSwerveModuleStates(
+                    // ChassisSpeeds.discretize(speeds, .02));
+                    // driveStates(swerveModuleStates);
+                }, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+                new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely
+                        // live
+                        // in your
+                        // Constants class
+                        new PIDConstants(5, 0.0, 0.0), // Translation PID constants
+                        new PIDConstants(3, 0.0, 0.0) // Rotation PID constants
+                        // Max module speed, in m/s // Drive base radius in meters. Distance from robot
+                        // center to
+                        // furthest module.
+                        // Default path replanning config. See the API
+                        // for the options here
                         ),
-                config, // The robot configuration
+                config,
                 () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red alliance
+                    // Boolean supplier that controls when the path will be mirrored for the red
+                    // alliance
                     // This will flip the path being followed to the red side of the field.
                     // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
@@ -116,22 +139,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 },
                 this // Reference to this subsystem to set requirements
                 );
-    }
-
-    public Pose2d getPose() {
-        return swerveDrive.getPose();
-    }
-
-    public void resetPose(Pose2d pose) {
-        swerveDrive.resetOdometry(pose);
-    }
-
-    public ChassisSpeeds getRobotRelativeSpeeds() {
-        return swerveDrive.getRobotVelocity();
-    }
-
-    public Rotation2d getOdometryHeading() {
-        return swerveDrive.getOdometryHeading();
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     /**
@@ -157,12 +165,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public void drive(double xPercent, double yPercent, double rotPercent, boolean fieldRelative) {
-        var xSpeed = xRateLimiter.calculate(xPercent) * Constants.SwerveDriveConstants.kMaxVelocityMetersPerSecond;
-        var ySpeed = yRateLimiter.calculate(yPercent) * Constants.SwerveDriveConstants.kMaxVelocityMetersPerSecond;
-        var rotationSpeed = rotRateLimiter.calculate(rotPercent)
-                * Constants.SwerveDriveConstants.kMaxAngularVelocityRadiansPerSecond;
+        var xSpeed = xRateLimiter.calculate(xPercent) * Constants.DriveConstants.MaxVelocityMetersPerSecond;
+        var ySpeed = yRateLimiter.calculate(yPercent) * Constants.DriveConstants.MaxVelocityMetersPerSecond;
+        var rot = rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.MaxAngularVelocityRadiansPerSecond;
 
-        swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, fieldRelative, false);
+        swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rot, fieldRelative, false);
     }
 
     /**
@@ -176,6 +183,32 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         // `isOpenLoop=true` sets the motor voltages to zero directly, instead of setting pid loops
         swerveDrive.setModuleStates(states, true);
     }
+
+    public Rotation2d getRotation() {
+        return swerveDrive.getOdometryHeading();
+    }
+
+    public Pose2d getPose() {
+        return swerveDrive.getPose();
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        swerveDrive.resetOdometry(pose);
+    }
+
+    private ChassisSpeeds getRobotVelocity() {
+        return swerveDrive.getRobotVelocity();
+    }
+
+    @Override
+    public void periodic() {
+        swerveDrive.updateOdometry();
+    }
+
+    public void acceptVisionData(Pose2d pose, double timestamp, Matrix<N3, N1> estimationStdDevs) {
+        swerveDrive.addVisionMeasurement(pose, timestamp, estimationStdDevs);
+    }
+    // feed photonvision data to the odometry of Swerve Drive class YAGSL
 
     /**
      * resets the angle at which the joystick considers forward, based on the robot's current pose

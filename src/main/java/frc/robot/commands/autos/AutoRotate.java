@@ -28,7 +28,7 @@ public class AutoRotate extends Command {
 
     @Override
     public void initialize() {
-        startingYaw = swerveSub.getOdometryHeading();
+        startingYaw = swerveSub.getRotation();
         if (goalYaw < 0) {
             turnSpeed = -turnSpeed;
         }
@@ -47,7 +47,7 @@ public class AutoRotate extends Command {
     @Override
     public boolean isFinished() {
         if (Math.abs(goalYaw)
-                < Math.abs(swerveSub.getOdometryHeading().minus(startingYaw).getDegrees())) {
+                < Math.abs(swerveSub.getRotation().minus(startingYaw).getDegrees())) {
             return true;
         } else {
             return false;
