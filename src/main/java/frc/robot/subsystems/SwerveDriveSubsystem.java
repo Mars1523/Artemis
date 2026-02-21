@@ -1,10 +1,14 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -100,6 +104,32 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         // `isOpenLoop=true` sets the motor voltages to zero directly, instead of setting pid loops
         swerveDrive.setModuleStates(states, true);
     }
+
+    public Rotation2d getRotation() {
+        return swerveDrive.getOdometryHeading();
+    }
+
+    public Pose2d getPose() {
+        return swerveDrive.getPose();
+    }
+
+    public void resetOmetry(Pose2d pose) {
+        swerveDrive.resetOdometry(pose);
+    }
+
+    private ChassisSpeeds getRobotVelocity() {
+        return swerveDrive.getRobotVelocity();
+    }
+
+    @Override
+    public void periodic(){
+        swerveDrive.updateOdometry();
+    }
+    public void acceptVisionData(Pose2d pose, double timestamp, Matrix<N3, N1> estimationStdDevs) {
+        swerveDrive.addVisionMeasurement(pose, timestamp, estimationStdDevs);
+    }
+    //feed photonvision data to the odometry of Swerve Drive class YAGSL
+
 
     /**
      * resets the angle at which the joystick considers forward, based on the robot's current pose
