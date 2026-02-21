@@ -43,10 +43,10 @@ public final class Constants {
         public static double kPYController = 3;
         public static double kPXController = 3;
         public static double kPThetaController = 1;
-        public static double kMaxSpeedMetersPerSecond = DriveConstants.MaxVelocityMetersPerSecond * .50;
+        public static double kMaxSpeedMetersPerSecond = DriveConstants.kMaxVelocityMetersPerSecond * .50;
         public static double kMaxAccelerationMetersPerSecondSquared = 4;
         public static Constraints kThetaControllerConstraints =
-                new Constraints(DriveConstants.MaxAngularVelocityRadiansPerSecond * .5, (Math.PI * 2) / 2);
+                new Constraints(DriveConstants.kMaxAngularVelocityRadiansPerSecond * .5, (Math.PI * 2) / 2);
     }
 
     public static class Vision {
@@ -114,11 +114,11 @@ public final class Constants {
          */
         public static final double kNeoFreeSpinRpm = 5676;
 
-        public static final double MaxVelocityMetersPerSecond =
+        public static final double kMaxVelocityMetersPerSecond =
                 (kNeoFreeSpinRpm / 60.0) * ModuleType.getDriveReduction() * ModuleType.getWheelDiameter() * Math.PI;
 
-        public static final double MaxAngularVelocityRadiansPerSecond =
-                MaxVelocityMetersPerSecond / Math.hypot(kTrackWidthMeters / 2, kTrackBaseMeters / 2) * .75;
+        public static final double kMaxAngularVelocityRadiansPerSecond =
+                kMaxVelocityMetersPerSecond / Math.hypot(kTrackWidthMeters / 2, kTrackBaseMeters / 2) * .75;
     }
 
     public static final class ModuleConstants {
@@ -141,25 +141,6 @@ public final class Constants {
         // public static final double kPModuleTurningController = 1;
 
         // public static final double kPModuleDriveController = 1;
-    }
-
-    public static class SwerveDriveConstants {
-        public static ModuleConfiguration kSwerveModuleConfiguration = SdsModuleConfigurations.MK4_L4;
-
-        // Distance between left and right wheels
-        public static final double kTrackWidthMeters = 0.5842 / 2;
-        // Distance between front and back wheels
-        public static final double kTrackBaseMeters = 0.6096 / 2;
-
-        // This max speed was theoretically based on free spin rpm,
-        // but could be improved by measuring actual max driving speed in practice
-        public static final double kNeoFreeSpinRpm = 5676;
-        public static final double kMaxVelocityMetersPerSecond = (kNeoFreeSpinRpm / 60.0)
-                * kSwerveModuleConfiguration.getDriveReduction()
-                * kSwerveModuleConfiguration.getWheelDiameter()
-                * Math.PI;
-        public static final double kMaxAngularVelocityRadiansPerSecond =
-                kMaxVelocityMetersPerSecond / Math.hypot(kTrackWidthMeters / 2, kTrackBaseMeters / 2) * .75;
     }
 
     public static final class OIConstants {

@@ -151,10 +151,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      */
     public void driveJoystick(double xPercent, double yPercent, double rotPercent) {
         // note that x is robot-forward, y is robot-sideways
-        var xSpeed = xRateLimiter.calculate(xPercent) * Constants.SwerveDriveConstants.kMaxVelocityMetersPerSecond;
-        var ySpeed = yRateLimiter.calculate(yPercent) * Constants.SwerveDriveConstants.kMaxVelocityMetersPerSecond;
-        var rotationSpeed = rotRateLimiter.calculate(rotPercent)
-                * Constants.SwerveDriveConstants.kMaxAngularVelocityRadiansPerSecond;
+        var xSpeed = xRateLimiter.calculate(xPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
+        var ySpeed = yRateLimiter.calculate(yPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
+        var rotationSpeed =
+                rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.kMaxAngularVelocityRadiansPerSecond;
 
         Rotation2d fieldHeading = swerveDrive.getOdometryHeading().minus(joystickForwardAngle);
         ChassisSpeeds chassisSpeeds =
@@ -165,11 +165,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public void drive(double xPercent, double yPercent, double rotPercent, boolean fieldRelative) {
-        var xSpeed = xRateLimiter.calculate(xPercent) * Constants.DriveConstants.MaxVelocityMetersPerSecond;
-        var ySpeed = yRateLimiter.calculate(yPercent) * Constants.DriveConstants.MaxVelocityMetersPerSecond;
-        var rot = rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.MaxAngularVelocityRadiansPerSecond;
+        var xSpeed = xRateLimiter.calculate(xPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
+        var ySpeed = yRateLimiter.calculate(yPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
+        var rotationSpeed =
+                rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.kMaxAngularVelocityRadiansPerSecond;
 
-        swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rot, fieldRelative, false);
+        swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, fieldRelative, false);
     }
 
     /**
