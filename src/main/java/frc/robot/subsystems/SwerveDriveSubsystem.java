@@ -148,29 +148,28 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param xPercent
      * @param yPercent
      * @param rotPercent
+     * @param driveMode
      */
-    public void driveJoystick(double xPercent, double yPercent, double rotPercent) {
-        // note that x is robot-forward, y is robot-sideways
+    public void drive(double xPercent, double yPercent, double rotPercent, DriveMode driveMode) {
         var xSpeed = xRateLimiter.calculate(xPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
         var ySpeed = yRateLimiter.calculate(yPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
         var rotationSpeed =
                 rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.kMaxAngularVelocityRadiansPerSecond;
 
-        Rotation2d fieldHeading = swerveDrive.getOdometryHeading().minus(joystickForwardAngle);
-        ChassisSpeeds chassisSpeeds =
-                ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rotationSpeed, fieldHeading);
-
-        // `isOpenLoop=false` makes the drive motors set velocity using motor pid loops
-        swerveDrive.drive(chassisSpeeds, false, new Translation2d());
-    }
-
-    public void drive(double xPercent, double yPercent, double rotPercent, boolean fieldRelative) {
-        var xSpeed = xRateLimiter.calculate(xPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
-        var ySpeed = yRateLimiter.calculate(yPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
-        var rotationSpeed =
-                rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.kMaxAngularVelocityRadiansPerSecond;
-
-        swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, fieldRelative, false);
+        switch (driveMode) {
+            case FIELD:
+                swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, true, false);
+                break;
+            case ROBOT:
+                swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, false, false);
+                break;
+            case JOYSTICK:
+                Rotation2d fieldHeading = swerveDrive.getOdometryHeading().minus(joystickForwardAngle);
+                ChassisSpeeds chassisSpeeds =
+                        ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rotationSpeed, fieldHeading);
+                swerveDrive.drive(chassisSpeeds, false, new Translation2d());
+                break;
+        }
     }
 
     /**

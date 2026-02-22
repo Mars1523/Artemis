@@ -2,6 +2,7 @@ package frc.robot.commands.autos;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.DriveMode;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 
 /**
@@ -36,12 +37,12 @@ public class AutoRotate extends Command {
 
     @Override
     public void execute() {
-        swerveSub.drive(0, 0, turnSpeed, false);
+        swerveSub.drive(0, 0, turnSpeed, DriveMode.ROBOT);
     }
 
     @Override
     public void end(boolean interrupted) {
-        swerveSub.drive(0, 0, 0, false);
+        swerveSub.drive(0, 0, 0, DriveMode.ROBOT);
     }
 
     @Override
