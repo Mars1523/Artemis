@@ -39,6 +39,19 @@ public final class Constants {
         public static final int kDriverControllerPort = 0;
     }
 
+    public static final class TurretConstants {
+        public static final double kTurretEncoderOffset = 0.196;
+    }
+
+    public static class CanIdConstants {
+        public static final int kTurretFeedCanId = 59;
+        public static final int kHopperCanId = 57;
+        public static final int kIntakeCanId = 55;
+        public static final int kLeftShooterCanId = 6;
+        public static final int kRightShooterCanId = 4;
+        public static final int kTurretRotateCanId = 41;
+    }
+
     public static final class AutoConstants {
         public static double kPYController = 3;
         public static double kPXController = 3;
