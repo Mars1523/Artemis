@@ -9,16 +9,23 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.AutoRotate;
+import frc.robot.subsystems.FuelInputSubsystem;
+import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 
 public class RobotContainer {
     CommandJoystick primaryJoy = new CommandJoystick(0);
+    CommandXboxController commandXboxController = new CommandXboxController(1);
     SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     DefaultSwerve defaultSwerve = new DefaultSwerve(primaryJoy.getHID(), swerveDriveSubsystem);
 
     SendableChooser<Command> autoChooser = AutoBuilder.buildAutoChooser();
+
+    FuelInputSubsystem intakeSubsystem = new FuelInputSubsystem();
+    LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
 
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
@@ -33,6 +40,9 @@ public class RobotContainer {
 
     private void configureBindings() {
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
+        commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
+        commandXboxController.x().whileTrue(intakeSubsystem.runIntakeReverse());
+        commandXboxController.b().whileTrue(launcherSubsystem.shootDuty());
     }
 
     public Command getAutonomousCommand() {
