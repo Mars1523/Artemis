@@ -27,7 +27,7 @@ import java.util.EnumSet;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-public class LauncherSubsystem extends SubsystemBase {
+public class LauncherSubsystemSparkMax extends SubsystemBase {
 
     // pid terms determined using REV Hardware Client 2
     // basically try to get flywheel to match setpoint RPM quickly without oscillating
@@ -57,7 +57,7 @@ public class LauncherSubsystem extends SubsystemBase {
     // SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.16075, 0.0021313, 0.00057038);
     SparkClosedLoopController motorController;
 
-    public LauncherSubsystem(PhotonCameraSubsystem photon) {
+    public LauncherSubsystemSparkMax(PhotonCameraSubsystem photon) {
         this.photon = photon;
 
         SparkMaxConfig motor1Config = new SparkMaxConfig();
