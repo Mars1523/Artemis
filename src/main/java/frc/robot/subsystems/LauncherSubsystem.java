@@ -10,6 +10,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkClosedLoopController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -37,11 +38,17 @@ public class LauncherSubsystem extends SubsystemBase {
         // this.photon = photon;
 
         // set left motor to clockwise leader and right motor to opposed follower (should rotate ccw)
+        // set both motors to coast mode as well
         // see docs here: https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/examples/quickstart.html
-        var outputConfigs = new MotorOutputConfigs();
-        outputConfigs.Inverted = InvertedValue.Clockwise_Positive;
-        leftMotor.getConfigurator().apply(outputConfigs);
+        var outputConfigsLeft = new MotorOutputConfigs();
+        outputConfigsLeft.NeutralMode = NeutralModeValue.Coast;
+        outputConfigsLeft.Inverted = InvertedValue.Clockwise_Positive;
+        leftMotor.getConfigurator().apply(outputConfigsLeft);
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+
+        var outputConfigsRight = new MotorOutputConfigs();
+        outputConfigsRight.NeutralMode = NeutralModeValue.Coast;
+        rightMotor.getConfigurator().apply(outputConfigsRight);
 
         // smart current limits at 40 A
         // see docs here:
