@@ -1,8 +1,10 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +22,10 @@ public class FuelInputSubsystem {
     // blue motor under the turret
     private final SparkMax turretFeedMotor = new SparkMax(CanIdConstants.kTurretFeedCanId, MotorType.kBrushless);
 
+    private final SparkMax intakeArm = new SparkMax(58, MotorType.kBrushless);
+
+    SparkClosedLoopController armController = intakeArm.getClosedLoopController();
+
     NTDouble intakeMotorSpeed = new NTDouble(0.5, "intakeMotorSpeed");
     NTDouble hopperMotorSpeed = new NTDouble(0.5, "hopperMotorSpeed");
     NTDouble turretFeedMotorSpeed = new NTDouble(0.8, "turretFeedMotorSpeed");
@@ -36,6 +42,23 @@ public class FuelInputSubsystem {
 
         hopperMotor.configure(
                 new SparkMaxConfig().smartCurrentLimit(20).inverted(true),
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
+
+        var intakeArmConfig = new SparkMaxConfig();
+        intakeArmConfig
+                .smartCurrentLimit(20);
+
+        intakeArmConfig.softLimit
+                .forwardSoftLimitEnabled(true)
+                .reverseSoftLimitEnabled(true)
+                .forwardSoftLimit(10)
+                .reverseSoftLimit(0);
+
+        intakeArmConfig.closedLoop
+                .outputRange(-0.2, 0.2)
+                .pid(0.07, 0, 0);
+        intakeArm.configure(intakeArmConfig,
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
     }
@@ -64,6 +87,21 @@ public class FuelInputSubsystem {
                     intakeMotor.set(0);
                     hopperMotor.set(0);
                     turretFeedMotor.set(0);
+                });
+    }
+
+    public Command intakeDown() {
+        return Commands.runOnce(
+                () -> {
+
+                    armController.setSetpoint(10, ControlType.kPosition);
+
+                });
+    }
+    public Command intakeUp() {
+        return Commands.runOnce(
+                () -> {
+                    armController.setSetpoint(0, ControlType.kPosition);
                 });
     }
 }
