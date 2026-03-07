@@ -43,6 +43,7 @@ public class RobotContainer {
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
         commandXboxController.x().whileTrue(intakeSubsystem.runIntakeReverse());
         commandXboxController.b().whileTrue(launcherSubsystem.shootDuty());
+        commandXboxController.y().whileTrue(launcherSubsystem.shootFF());
     }
 
     public Command getAutonomousCommand() {

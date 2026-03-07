@@ -6,13 +6,14 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkClosedLoopController;
-
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,6 +51,14 @@ public class LauncherSubsystem extends SubsystemBase {
     // public static final double kA = 0.0067792;
     public static final double kA = 0;
 
+    public Slot0Configs slot0ConfigsLeft = new Slot0Configs();
+
+    // gets unstable around ~1.0, we can fine-tune this further
+    public NTDouble kP = new NTDouble(0.2, "launcher/P");
+    public NTDouble kI = new NTDouble(0, "launcher/I");
+    public NTDouble kD = new NTDouble(0, "launcher/D");
+    public NTDouble targetRps = new NTDouble(10, "launcher/targetRPS");
+
     // public LauncherSubsystem(PhotonCameraSubsystem photon) {
     public LauncherSubsystem() {
         // this.photon = photon;
@@ -60,6 +69,30 @@ public class LauncherSubsystem extends SubsystemBase {
         var outputConfigsLeft = new MotorOutputConfigs();
         outputConfigsLeft.NeutralMode = NeutralModeValue.Coast;
         outputConfigsLeft.Inverted = InvertedValue.Clockwise_Positive;
+
+        // see docs here:
+        // https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/basic-pid-control.html
+        slot0ConfigsLeft.kS = kS;
+        slot0ConfigsLeft.kV = kV;
+        slot0ConfigsLeft.kA = kA;
+        slot0ConfigsLeft.kP = this.kP.get();
+        slot0ConfigsLeft.kI = this.kI.get();
+        slot0ConfigsLeft.kD = this.kD.get();
+        leftMotor.getConfigurator().apply(slot0ConfigsLeft);
+
+        kP.subscribe((newP) -> {
+            slot0ConfigsLeft.kP = newP;
+            leftMotor.getConfigurator().apply(slot0ConfigsLeft);
+        });
+        kI.subscribe((newI) -> {
+            slot0ConfigsLeft.kI = newI;
+            leftMotor.getConfigurator().apply(slot0ConfigsLeft);
+        });
+        kD.subscribe((newD) -> {
+            slot0ConfigsLeft.kD = newD;
+            leftMotor.getConfigurator().apply(slot0ConfigsLeft);
+        });
+
         leftMotor.getConfigurator().apply(outputConfigsLeft);
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
@@ -115,6 +148,14 @@ public class LauncherSubsystem extends SubsystemBase {
 
     public void setMotorDuty(double speed) {
         leftMotor.set(speed);
+    }
+
+    public Command shootFF() {
+        return run(() -> shootRps(targetRps.get())).finallyDo(() -> leftMotor.set(0));
+    }
+
+    public void shootRps(double rps) {
+        leftMotor.setControl(new VelocityVoltage(rps));
     }
 
     @Override
