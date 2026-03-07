@@ -21,11 +21,13 @@ import org.littletonrobotics.junction.Logger;
 public class TurretSubsystem extends SubsystemBase {
     // private Servo turret = new Servo(1);
     private SwerveDriveSubsystem swerve;
-    private SparkMax turretMotor = new SparkMax(0, MotorType.kBrushless);
+    private SparkMax turretMotor = new SparkMax(41, MotorType.kBrushless);
     SparkClosedLoopController turretController;
+    private static final double minAngle = -0.48;
+    private static final double maxAngle = 0.48;
 
     SparkMaxConfig turretConfig = new SparkMaxConfig();
-
+    // for PID constants finding
     public static double scale(double value, double minValue, double maxValue, double minOut, double maxOut) {
         return minOut + ((value - minValue) / (maxValue - minValue)) * (maxOut - minOut);
     }
@@ -35,16 +37,22 @@ public class TurretSubsystem extends SubsystemBase {
 
     public TurretSubsystem(SwerveDriveSubsystem swerve) {
         this.swerve = swerve;
-        // setServoAngle(new Rotation2d(0))
 
         turretConfig.absoluteEncoder.zeroCentered(true);
         turretConfig.absoluteEncoder.inverted(true);
+        turretConfig.encoder.positionConversionFactor(0.01111111111111);
         turretConfig.absoluteEncoder.positionConversionFactor(1.5);
         turretController = turretMotor.getClosedLoopController();
-        turretConfig.closedLoop.p(0).i(0).d(0);
-        turretConfig.closedLoop.feedForward.kS(0).kV(0).kA(0);
+        turretConfig.closedLoop.feedForward.kS(0.17).kV(0).kA(0);
         turretConfig.closedLoop.maxMotion.cruiseVelocity(0).maxAcceleration(0);
         turretConfig.smartCurrentLimit(40, 40);
+        turretConfig
+                .softLimit
+                .forwardSoftLimitEnabled(true)
+                .reverseSoftLimitEnabled(true)
+                .forwardSoftLimit(0.4)
+                .reverseSoftLimit(-0.4);
+        turretConfig.closedLoop.outputRange(-0.9, 0.9).pid(10, 0, 0);
 
         turretMotor.configure(turretConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         turretMotor.getEncoder().setPosition(turretMotor.getAbsoluteEncoder().getPosition());
@@ -90,15 +98,25 @@ public class TurretSubsystem extends SubsystemBase {
         return run(() -> shootAtHopper());
     }
 
-    public double motorToEncoder() {
-        double encoderRotation = turretMotor.getAbsoluteEncoder().getPosition();
-        return encoderRotation * (3 / 2) * 360;
-    }
-
-    double Turretsetpoint;
+    double finalSetpoint;
 
     public void setTurretSetpoint(Rotation2d angle) {
-        Turretsetpoint = angle.getRotations();
+        double turretsetpoint = angle.getRotations();
+        double turretPos = turretMotor.getAbsoluteEncoder().getPosition();
+        finalSetpoint = turretsetpoint;
+        if (turretsetpoint > 0 && turretPos < 0) {
+            finalSetpoint = turretsetpoint - 1;
+            if (finalSetpoint < -0.6) {
+                finalSetpoint = turretsetpoint;
+            }
+        } else if (turretsetpoint < 0 && turretPos > 0) {
+            finalSetpoint = turretsetpoint + 1;
+            if (finalSetpoint > 0.6) {
+                finalSetpoint = turretsetpoint;
+            }
+        } else {
+            finalSetpoint = turretsetpoint;
+        }
     }
 
     /*
@@ -173,30 +191,37 @@ public class TurretSubsystem extends SubsystemBase {
         var robotToTargetFieldAngle = target.minus(robotFieldPosition).getAngle();
         var robotPoseToTargetAngle = robotToTargetFieldAngle.minus(robotPoseAngle);
         setTurretSetpoint(robotPoseToTargetAngle);
+
+        // if(robotPoseToTargetAngle > 0){
+
+        // }
+
     }
 
     public boolean isPastBack() {
         if ((turretMotor.getEncoder().getPosition() > 0.55
                         || turretMotor.getEncoder().getPosition() < -0.55)
-                && Math.abs(Turretsetpoint) < 0.2) {
+                && Math.abs(finalSetpoint) < 0.2) {
             return true;
         } else {
             return false;
         }
     }
 
+    Rotation2d i = new Rotation2d();
+
     @Override
     public void periodic() {
-        if (DriverStation.isDisabled()) {
-            Turretsetpoint = turretMotor.getEncoder().getPosition();
-            trapezoidSetpoint = new TrapezoidProfile.State(
-                    turretMotor.getEncoder().getPosition(),
-                    turretMotor.getEncoder().getVelocity());
-            turretController.setSetpoint(trapezoidSetpoint.position, ControlType.kPosition);
-        }
 
-        trapezoidSetpoint =
-                trapezoidProfile.calculate(0.02, trapezoidSetpoint, new TrapezoidProfile.State(Turretsetpoint, 0));
-        turretController.setSetpoint(Turretsetpoint, ControlType.kPosition);
+        /*
+        i = i.plus(Rotation2d.fromDegrees(1));
+        setTurretSetpoint(i);
+        Logger.recordOutput("Rotationi", i);
+        Logger.recordOutput("RotationFinal", finalSetpoint);
+        SmartDashboard.putNumber("ROtationI", i.getRotations());
+        SmartDashboard.putNumber("ROtationFinal", finalSetpoint);
+        */
+        // System.err.println(".,");
+        turretController.setSetpoint(finalSetpoint, ControlType.kPosition);
     }
 }

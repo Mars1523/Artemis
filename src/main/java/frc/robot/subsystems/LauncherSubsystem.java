@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -15,6 +17,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkClosedLoopController;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,6 +33,8 @@ public class LauncherSubsystem extends SubsystemBase {
 
     TalonFX leftMotor = new TalonFX(CanIdConstants.kLeftShooterCanId);
     TalonFX rightMotor = new TalonFX(CanIdConstants.kRightShooterCanId);
+
+    VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
     // note Talon uses rotations/sec
     public static final String leftMotorRpsEntry = "Launcher/LeftMotorRps";
@@ -58,6 +63,8 @@ public class LauncherSubsystem extends SubsystemBase {
     public NTDouble kI = new NTDouble(0, "launcher/I");
     public NTDouble kD = new NTDouble(0, "launcher/D");
     public NTDouble targetRps = new NTDouble(10, "launcher/targetRPS");
+    public NTDouble targetDistance = new NTDouble(0, "launcher/distance");
+    public NTDouble targetHeight = new NTDouble(0, "launcher/height");
 
     // public LauncherSubsystem(PhotonCameraSubsystem photon) {
     public LauncherSubsystem() {
@@ -150,16 +157,29 @@ public class LauncherSubsystem extends SubsystemBase {
         leftMotor.set(speed);
     }
 
+    public double rps = 0;
+
     public Command shootFF() {
-        return run(() -> shootRps(targetRps.get())).finallyDo(() -> leftMotor.set(0));
+        return run(() -> shootVelocity(RotationsPerSecond.of(rps))).finallyDo(() -> leftMotor.set(0));
     }
 
-    public void shootRps(double rps) {
-        leftMotor.setControl(new VelocityVoltage(rps));
+    public void shootVelocity(AngularVelocity speed) {
+        leftMotor.setControl(velocityRequest.withVelocity(speed));
+    }
+
+    public void shootPhoton() {
+        double distance = targetDistance.get();
+        double height = targetHeight.get();
+        double speed = Math.sqrt((9.8 * Math.pow(distance, 2))
+                / (2 * Math.pow(Math.cos(1.396), 2) * (distance * Math.tan(Math.PI / 3) - (height - 0.7))));
+        Logger.recordOutput("flywheel/speedMPS", speed);
+        rps = ((speed / (2 * Math.PI * 0.076)) * 2) / 0.7;
+        Logger.recordOutput("flywheel/speedRPS", rps);
     }
 
     @Override
     public void periodic() {
+        shootPhoton();
         // This method will be called once per scheduler run
         Logger.recordOutput(leftMotorRpsEntry, leftMotor.getVelocity().getValueAsDouble());
         Logger.recordOutput(rightMotorRpsEntry, rightMotor.getVelocity().getValueAsDouble());

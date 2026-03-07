@@ -15,6 +15,7 @@ import frc.robot.commands.autos.AutoRotate;
 import frc.robot.subsystems.FuelInputSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.SwerveDriveSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 
 public class RobotContainer {
     CommandJoystick primaryJoy = new CommandJoystick(0);
@@ -24,8 +25,10 @@ public class RobotContainer {
 
     SendableChooser<Command> autoChooser = AutoBuilder.buildAutoChooser();
 
-    FuelInputSubsystem intakeSubsystem = new FuelInputSubsystem();
+    FuelInputSubsystem fuelInputSubsystem = new FuelInputSubsystem();
     LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
+
+    TurretSubsystem turretSubsystem = new TurretSubsystem(swerveDriveSubsystem);
 
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
@@ -40,10 +43,10 @@ public class RobotContainer {
 
     private void configureBindings() {
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
-        commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
-        commandXboxController.x().whileTrue(intakeSubsystem.runIntakeReverse());
-        commandXboxController.b().whileTrue(launcherSubsystem.shootDuty());
-        commandXboxController.y().whileTrue(launcherSubsystem.shootFF());
+        commandXboxController.a().whileTrue(fuelInputSubsystem.runIntake());
+        commandXboxController.b().whileTrue(launcherSubsystem.shootFF());
+        commandXboxController.rightBumper().onTrue(fuelInputSubsystem.intakeUp());
+        commandXboxController.leftBumper().onTrue(fuelInputSubsystem.intakeDown());
     }
 
     public Command getAutonomousCommand() {
