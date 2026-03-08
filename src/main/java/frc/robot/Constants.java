@@ -50,6 +50,7 @@ public final class Constants {
         public static final int kLeftShooterCanId = 6;
         public static final int kRightShooterCanId = 4;
         public static final int kTurretRotateCanId = 41;
+        public static final int kIntakeArmCanId = 58;
     }
 
     public static final class AutoConstants {
