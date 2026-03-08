@@ -167,13 +167,32 @@ public class LauncherSubsystem extends SubsystemBase {
         leftMotor.setControl(velocityRequest.withVelocity(speed));
     }
 
+    // Used the Exel data sheet On discord in the programming general channel for the equation and data points
+    // fit using cubic
+    public double launcherRpsForDistance(double distance) {
+        // returns rps
+
+        // double[] distances = {230, 188, 152, 106, 81, 74.5};
+        // double[] rpsValues = {85,72,62,50,45,44};
+
+        double launcherRps;
+
+        // To Do: make ranges for each of the distance values
+        /*
+        for(int i =0; i<distances.length; i++){
+            if(distance == distances[i]){
+                launcherRps = rpsValues[i];
+                return launcherRps;
+            }
+        }*/
+
+        launcherRps = -2.0e-06 * Math.pow(distance, 2) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
+        return launcherRps;
+    }
+
     public void shootPhoton() {
         double distance = targetDistance.get();
-        double height = targetHeight.get();
-        double speed = Math.sqrt((9.8 * Math.pow(distance, 2))
-                / (2 * Math.pow(Math.cos(1.396), 2) * (distance * Math.tan(Math.PI / 3) - (height - 0.7))));
-        Logger.recordOutput("flywheel/speedMPS", speed);
-        rps = ((speed / (2 * Math.PI * 0.076)) * 2) / 0.7;
+        rps = launcherRpsForDistance(distance);
         Logger.recordOutput("flywheel/speedRPS", rps);
     }
 
