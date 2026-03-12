@@ -94,8 +94,8 @@ public class TurretSubsystem extends SubsystemBase {
         return run(() -> shootAtHome());
     }
 
-    public Command shootAtHopperCommand() {
-        return run(() -> shootAtHopper());
+    public Command shootAtHubCommand() {
+        return run(() -> shootAtHub());
     }
 
     double finalSetpoint;
@@ -133,7 +133,7 @@ public class TurretSubsystem extends SubsystemBase {
         }
     }*/
 
-    public void shootAtHopper() {
+    public void shootAtHub() {
         var robotFieldPosition = swerve.getPose().getTranslation();
         if (robotFieldPosition.getX() == 0 && robotFieldPosition.getY() == 0) return;
         var robotPoseAngle = swerve.getPose().getRotation();

@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "red go through bottom trench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "red collect balls after going through the bottom trench"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootAtHomeCommand"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Red Alliance",
+  "choreoAuto": false
+}

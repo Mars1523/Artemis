@@ -5,6 +5,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,6 +34,13 @@ public class RobotContainer {
 
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
+        NamedCommands.registerCommand("shootVelocityCommand", launcherSubsystem.shootVelocityCommand());
+        NamedCommands.registerCommand("intakeUp", fuelInputSubsystem.intakeUp());
+        NamedCommands.registerCommand("intakeDown", fuelInputSubsystem.intakeDown());
+        NamedCommands.registerCommand("runIntake", fuelInputSubsystem.runIntake());
+        NamedCommands.registerCommand("runIntakeReverse", fuelInputSubsystem.runIntakeReverse());
+        NamedCommands.registerCommand("shootAtHomeCommand", turretSubsystem.shootAtHomeCommand());
+        NamedCommands.registerCommand("shootAtHub", turretSubsystem.shootAtHubCommand());
         configureAutos();
         configureBindings();
     }
@@ -44,7 +53,8 @@ public class RobotContainer {
     private void configureBindings() {
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
         commandXboxController.a().whileTrue(fuelInputSubsystem.runIntake());
-        commandXboxController.b().whileTrue(launcherSubsystem.shootFF());
+        commandXboxController.b().whileTrue(launcherSubsystem.shootPhotonCommand());
+        commandXboxController.x().whileTrue(launcherSubsystem.shootVelocityCommand());
         commandXboxController.rightBumper().onTrue(fuelInputSubsystem.intakeUp());
         commandXboxController.leftBumper().onTrue(fuelInputSubsystem.intakeDown());
     }

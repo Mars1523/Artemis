@@ -1,0 +1,55 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shootVelocityCommand"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeUp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeDown"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntakeReverse"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootAtHomeCommand"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootAtHub"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

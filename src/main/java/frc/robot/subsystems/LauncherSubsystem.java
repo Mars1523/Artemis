@@ -64,7 +64,6 @@ public class LauncherSubsystem extends SubsystemBase {
     public NTDouble kD = new NTDouble(0, "launcher/D");
     public NTDouble targetRps = new NTDouble(10, "launcher/targetRPS");
     public NTDouble targetDistance = new NTDouble(0, "launcher/distance");
-    public NTDouble targetHeight = new NTDouble(0, "launcher/height");
 
     // public LauncherSubsystem(PhotonCameraSubsystem photon) {
     public LauncherSubsystem() {
@@ -159,8 +158,9 @@ public class LauncherSubsystem extends SubsystemBase {
 
     public double rps = 0;
 
-    public Command shootFF() {
-        return run(() -> shootVelocity(RotationsPerSecond.of(rps))).finallyDo(() -> leftMotor.set(0));
+    public Command shootVelocityCommand() {
+        return run(() -> shootVelocity(RotationsPerSecond.of(targetRps.get())))
+            .finallyDo(() -> leftMotor.set(0));
     }
 
     public void shootVelocity(AngularVelocity speed) {
@@ -186,8 +186,13 @@ public class LauncherSubsystem extends SubsystemBase {
             }
         }*/
 
-        launcherRps = -2.0e-06 * Math.pow(distance, 2) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
+        launcherRps = -2.0e-06 * Math.pow(distance, 3) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
         return launcherRps;
+    }
+
+    public Command shootPhotonCommand() {
+        return run(() -> shootPhoton())
+            .finallyDo(() -> setMotorDuty(0));
     }
 
     public void shootPhoton() {
