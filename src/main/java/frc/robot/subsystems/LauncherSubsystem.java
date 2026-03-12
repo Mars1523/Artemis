@@ -167,15 +167,18 @@ public class LauncherSubsystem extends SubsystemBase {
         leftMotor.setControl(velocityRequest.withVelocity(speed));
     }
 
+    public void shootDistance(double distance) {
+        double rps = launcherRpsForDistance(distance);
+        shootVelocity(AngularVelocity.ofBaseUnits(rps, RotationsPerSecond));
+    }
+
     // Used the Exel data sheet On discord in the programming general channel for the equation and data points
     // fit using cubic
     public double launcherRpsForDistance(double distance) {
         // returns rps
 
-        // double[] distances = {230, 188, 152, 106, 81, 74.5};
-        // double[] rpsValues = {85,72,62,50,45,44};
-
-        double launcherRps;
+        // double[] distances = {63,89,140,168,188,203,227};
+        // double[] rpsValues = {45,47,59,64,67,73,78.5};
 
         // To Do: make ranges for each of the distance values
         /*
@@ -186,7 +189,13 @@ public class LauncherSubsystem extends SubsystemBase {
             }
         }*/
 
-        launcherRps = -2.0e-06 * Math.pow(distance, 3) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
+
+        //launcherRps = -2.0e-06 * Math.pow(distance, 3) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
+        double a = -1.29e-06;
+        double b = 9.63e-04;
+        double c = 1.72e-02;
+        double d = 3.99e01;
+        double launcherRps = a * Math.pow(distance, 3) + b * Math.pow(distance, 2) + c * distance + d;
         return launcherRps;
     }
 

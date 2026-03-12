@@ -9,10 +9,11 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CanIdConstants;
 import frc.robot.NTDouble;
 
-public class FuelInputSubsystem {
+public class FuelInputSubsystem extends SubsystemBase {
     // small green bars outside the robot
     private final SparkMax intakeMotor = new SparkMax(CanIdConstants.kIntakeCanId, MotorType.kBrushless);
 
@@ -22,7 +23,7 @@ public class FuelInputSubsystem {
     // blue motor under the turret
     private final SparkMax turretFeedMotor = new SparkMax(CanIdConstants.kTurretFeedCanId, MotorType.kBrushless);
 
-    private final SparkMax intakeArm = new SparkMax(58, MotorType.kBrushless);
+    private final SparkMax intakeArm = new SparkMax(CanIdConstants.kIntakeArmCanId, MotorType.kBrushless);
 
     public double intakeArmUpPosition = 0;
     public double intakeArmDownPosition = -10;
