@@ -167,6 +167,11 @@ public class LauncherSubsystem extends SubsystemBase {
         leftMotor.setControl(velocityRequest.withVelocity(speed));
     }
 
+    public void shootDistance(double distance) {
+        double rps = launcherRpsForDistance(distance);
+        shootVelocity(AngularVelocity.ofBaseUnits(rps, RotationsPerSecond));
+    }
+
     // Used the Exel data sheet On discord in the programming general channel for the equation and data points
     // fit using cubic
     public double launcherRpsForDistance(double distance) {

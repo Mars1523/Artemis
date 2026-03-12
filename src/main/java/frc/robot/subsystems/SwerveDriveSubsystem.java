@@ -196,7 +196,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         swerveDrive.resetOdometry(pose);
     }
 
-    private ChassisSpeeds getRobotVelocity() {
+    public ChassisSpeeds getRobotVelocity() {
         return swerveDrive.getRobotVelocity();
     }
 

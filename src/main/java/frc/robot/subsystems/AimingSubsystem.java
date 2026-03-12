@@ -5,6 +5,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AimingSubsystem extends SubsystemBase {
@@ -25,18 +27,23 @@ public class AimingSubsystem extends SubsystemBase {
             private final double ballVelocityFactor = 0.8;
             private final double launchDelaySeconds;
             private final Translation2d shooterOffsetFromRobotCenter;
+
             SwerveDriveSubsystem swerveDriveSubsystem;
             LauncherSubsystem launcherSubsystem;
+            TurretSubsystem turretSubsystem;
+
             public AimingSubsystem(
                     SwerveDriveSubsystem swerveDriveSubsystem,
                     double launchDelaySeconds,
                     Translation2d shooterOffsetFromRobotCenter,
-                    LauncherSubsystem launcherSubsystem
+                    LauncherSubsystem launcherSubsystem,
+                    TurretSubsystem turretSubsystem
                     ) {
                 this.launchDelaySeconds = launchDelaySeconds;
                 this.shooterOffsetFromRobotCenter = shooterOffsetFromRobotCenter;
                 this.launcherSubsystem = launcherSubsystem;
                 this.swerveDriveSubsystem = swerveDriveSubsystem;
+                this.turretSubsystem = turretSubsystem;
             }
         
         
@@ -125,5 +132,43 @@ public class AimingSubsystem extends SubsystemBase {
         solution.hasSolution = true;
         return solution;
     }
-}
 
+    // found using PathPlanner
+    private final Translation2d kRedHubCoordinates = new Translation2d(11.919, 4.029);
+    private final Translation2d kBlueHubCoordinates = new Translation2d(4.621, 4.029);
+
+    public void shootAtHub() {
+        Translation2d hubCoordinates = DriverStation.getAlliance().get() == Alliance.Red ?
+                kRedHubCoordinates : kBlueHubCoordinates;
+
+        Pose2d robotPose = swerveDriveSubsystem.getPose();
+        Translation2d robotCoordinates = robotPose.getTranslation();
+        // account for turret offset?
+        //Translation2d shooterFieldPosition =
+        //        robotPose.getTranslation().plus(
+        //                shooterOffsetFromRobotCenter.rotateBy(robotPose.getRotation()));
+        Translation2d toAllianceHub = hubCoordinates.minus(robotCoordinates);
+
+        double distance = toAllianceHub.getNorm();
+        double flightTimeSeconds = getTimeOfFlight(distance);
+        ChassisSpeeds robotVelocity = swerveDriveSubsystem.getRobotVelocity();
+        double xError = robotVelocity.vxMetersPerSecond * flightTimeSeconds;
+        double yError = robotVelocity.vyMetersPerSecond * flightTimeSeconds;
+        Translation2d error = new Translation2d(xError, yError);
+        Translation2d correctedToAllianceHub = toAllianceHub.minus(error);
+
+        double correctedDistance = correctedToAllianceHub.getNorm();
+        launcherSubsystem.shootDistance(correctedDistance);
+
+        Rotation2d robotAngleField = robotPose.getRotation();
+        Rotation2d hubAngleField = correctedToAllianceHub.getAngle();
+        Rotation2d hubAngleRobot = hubAngleField.minus(robotAngleField);
+        turretSubsystem.setTurretSetpoint(hubAngleRobot);
+    }
+
+    private double getTimeOfFlight(double distance) {
+        // todo: measure values or use kinematics
+        // currently a placeholder
+        return 1.0;
+    }
+}
