@@ -6,7 +6,6 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.AutoRotate;
+import frc.robot.subsystems.AimingSubsystem;
 import frc.robot.subsystems.FuelInputSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.PhotonCameraSubsystem;
@@ -33,8 +33,11 @@ public class RobotContainer {
 
     TurretSubsystem turretSubsystem = new TurretSubsystem(swerveDriveSubsystem);
 
-    PhotonCameraSubsystem photonCameraSubsystem =
-            new PhotonCameraSubsystem(swerveDriveSubsystem::acceptVisionData, () -> swerveDriveSubsystem.getRobotVelocity().omegaRadiansPerSecond);
+    AimingSubsystem aimingSubsystem = new AimingSubsystem(swerveDriveSubsystem, launcherSubsystem, turretSubsystem);
+
+    PhotonCameraSubsystem photonCameraSubsystem = new PhotonCameraSubsystem(
+            swerveDriveSubsystem::acceptVisionData,
+            () -> swerveDriveSubsystem.getRobotVelocity().omegaRadiansPerSecond);
 
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);

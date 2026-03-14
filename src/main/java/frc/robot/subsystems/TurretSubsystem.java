@@ -16,15 +16,17 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 // import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CanIdConstants;
+import frc.robot.NTDouble;
 import org.littletonrobotics.junction.Logger;
 
 public class TurretSubsystem extends SubsystemBase {
     // private Servo turret = new Servo(1);
     private SwerveDriveSubsystem swerve;
-    private SparkMax turretMotor = new SparkMax(41, MotorType.kBrushless);
+    private SparkMax turretMotor = new SparkMax(CanIdConstants.kTurretRotateCanId, MotorType.kBrushless);
     SparkClosedLoopController turretController;
-    private static final double minAngle = -0.48;
-    private static final double maxAngle = 0.48;
+    private static final double minAngle = -0.25;
+    private static final double maxAngle = 0.25;
 
     SparkMaxConfig turretConfig = new SparkMaxConfig();
     // for PID constants finding
@@ -35,27 +37,34 @@ public class TurretSubsystem extends SubsystemBase {
     TrapezoidProfile trapezoidProfile = new TrapezoidProfile(new Constraints(30, 10));
     TrapezoidProfile.State trapezoidSetpoint = new TrapezoidProfile.State();
 
+    double finalSetpoint;
+    NTDouble customSetpoint;
+
     public TurretSubsystem(SwerveDriveSubsystem swerve) {
         this.swerve = swerve;
 
         turretConfig.absoluteEncoder.zeroCentered(true);
         turretConfig.absoluteEncoder.inverted(true);
-        turretConfig.encoder.positionConversionFactor(0.01111111111111);
+        turretConfig.encoder.positionConversionFactor(0.01111111111111).velocityConversionFactor(0.01111111111111);
         turretConfig.absoluteEncoder.positionConversionFactor(1.5);
-        turretController = turretMotor.getClosedLoopController();
-        turretConfig.closedLoop.feedForward.kS(0.17).kV(0).kA(0);
-        turretConfig.closedLoop.maxMotion.cruiseVelocity(0).maxAcceleration(0);
-        turretConfig.smartCurrentLimit(40, 40);
+        turretConfig.closedLoop.feedForward.kS(0.17).kV(.127);
+        turretConfig.closedLoop.maxMotion.cruiseVelocity(10).maxAcceleration(10);
+        turretConfig.smartCurrentLimit(20, 20);
         turretConfig
                 .softLimit
                 .forwardSoftLimitEnabled(true)
                 .reverseSoftLimitEnabled(true)
                 .forwardSoftLimit(0.675)
                 .reverseSoftLimit(-0.325);
-        turretConfig.closedLoop.outputRange(-0.9, 0.9).pid(10, 0, 0);
+        turretConfig.closedLoop.outputRange(-0.8, 0.8).pid(10, 0, 0);
 
+        double startingPosition = turretMotor.getAbsoluteEncoder().getPosition();
         turretMotor.configure(turretConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        turretMotor.getEncoder().setPosition(turretMotor.getAbsoluteEncoder().getPosition());
+        turretMotor.getEncoder().setPosition(startingPosition);
+
+        turretController = turretMotor.getClosedLoopController();
+        customSetpoint = new NTDouble(startingPosition, "Turret/Setpoint");
+        customSetpoint.subscribe((newSetpoint) -> turretController.setSetpoint(newSetpoint, ControlType.kPosition));
     }
 
     // private void setServoAngle(Rotation2d angle) {
@@ -98,10 +107,21 @@ public class TurretSubsystem extends SubsystemBase {
         return run(() -> shootAtHub());
     }
 
-    double finalSetpoint;
+    public Command setTurretAngleCommand(Rotation2d angle) {
+        return run(() -> setTurretAngle(angle));
+    }
 
-    public void setTurretSetpoint(Rotation2d angle) {
+    public void setTurretAngle(Rotation2d angle) {
+        Logger.recordOutput("Turret/SetTurretAngle", angle.getDegrees());
         double turretsetpoint = angle.getRotations();
+        if (turretsetpoint > 0.675) {
+            turretsetpoint -= 1;
+        }
+        if (turretsetpoint < -0.325) {
+            turretsetpoint += 1;
+        }
+        setTurretSetpoint(turretsetpoint);
+        /*
         double turretPos = turretMotor.getAbsoluteEncoder().getPosition();
         finalSetpoint = turretsetpoint;
         if (turretsetpoint > 0 && turretPos < 0) {
@@ -116,7 +136,12 @@ public class TurretSubsystem extends SubsystemBase {
             }
         } else {
             finalSetpoint = turretsetpoint;
-        }
+        }*/
+    }
+
+    public void setTurretSetpoint(double setPoint) {
+        Logger.recordOutput("turretSetpoint", setPoint);
+        turretController.setSetpoint(setPoint, ControlType.kPosition);
     }
 
     /*
@@ -147,7 +172,7 @@ public class TurretSubsystem extends SubsystemBase {
         Logger.recordOutput("Turret/robotPoseToHopperAngle", robotPoseToHopperAngle.getDegrees());
         // Constants.kField.;
         // turret.se(scaletarget.getDegrees());
-        setTurretSetpoint(robotPoseToHopperAngle);
+        setTurretAngle(robotPoseToHopperAngle);
     }
 
     public static boolean isRed() {
@@ -189,7 +214,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         var robotToTargetFieldAngle = target.minus(robotFieldPosition).getAngle();
         var robotPoseToTargetAngle = robotToTargetFieldAngle.minus(robotPoseAngle);
-        setTurretSetpoint(robotPoseToTargetAngle);
+        setTurretAngle(robotPoseToTargetAngle);
 
         // if(robotPoseToTargetAngle > 0){
 
@@ -211,7 +236,16 @@ public class TurretSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-
+        Logger.recordOutput(
+                "Turret/AbsoluteEncoderPosition",
+                turretMotor.getAbsoluteEncoder().getPosition());
+        Logger.recordOutput("Turret/EncoderPosition", turretMotor.getEncoder().getPosition());
+        Logger.recordOutput(
+                "Turret/MotorControllerSetpoint",
+                turretMotor.getClosedLoopController().getSetpoint());
+        Logger.recordOutput(
+                "Turret/Error",
+                turretController.getSetpoint() - turretMotor.getEncoder().getPosition());
         /*
         i = i.plus(Rotation2d.fromDegrees(1));
         setTurretSetpoint(i);
@@ -221,6 +255,6 @@ public class TurretSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("ROtationFinal", finalSetpoint);
         */
         // System.err.println(".,");
-        turretController.setSetpoint(finalSetpoint, ControlType.kPosition);
+        // turretController.setSetpoint(finalSetpoint, ControlType.kPosition);
     }
 }

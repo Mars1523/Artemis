@@ -159,8 +159,7 @@ public class LauncherSubsystem extends SubsystemBase {
     public double rps = 0;
 
     public Command shootVelocityCommand() {
-        return run(() -> shootVelocity(RotationsPerSecond.of(targetRps.get())))
-            .finallyDo(() -> leftMotor.set(0));
+        return run(() -> shootVelocity(RotationsPerSecond.of(targetRps.get()))).finallyDo(() -> leftMotor.set(0));
     }
 
     public void shootVelocity(AngularVelocity speed) {
@@ -189,8 +188,7 @@ public class LauncherSubsystem extends SubsystemBase {
             }
         }*/
 
-
-        //launcherRps = -2.0e-06 * Math.pow(distance, 3) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
+        // launcherRps = -2.0e-06 * Math.pow(distance, 3) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
         double a = -1.29e-06;
         double b = 9.63e-04;
         double c = 1.72e-02;
@@ -200,8 +198,7 @@ public class LauncherSubsystem extends SubsystemBase {
     }
 
     public Command shootPhotonCommand() {
-        return run(() -> shootPhoton())
-            .finallyDo(() -> setMotorDuty(0));
+        return run(() -> shootPhoton()).finallyDo(() -> setMotorDuty(0));
     }
 
     public void shootPhoton() {
