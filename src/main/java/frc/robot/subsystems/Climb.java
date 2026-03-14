@@ -6,15 +6,22 @@ package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climb extends SubsystemBase {
+    int upSetpoint = 0;
+    int downSetpoint = 0;
+
     SwerveDriveSubsystem swerve;
     private final SparkMax climb1 = new SparkMax(1, MotorType.kBrushless);
     private final SparkMax climb2 = new SparkMax(2, MotorType.kBrushless);
+    private SparkClosedLoopController climbController;
     /** Creates a new Climb. */
     public Climb(SwerveDriveSubsystem swerve) {
         this.swerve = swerve;
@@ -22,12 +29,29 @@ public class Climb extends SubsystemBase {
         SparkMaxConfig climb2Config = new SparkMaxConfig();
 
         climb1Config.closedLoop.p(0).i(0).d(0);
+        climb1Config.inverted(true);
         climb1Config.closedLoop.feedForward.kS(0).kV(0).kA(0);
         climb1Config.closedLoop.maxMotion.cruiseVelocity(0).maxAcceleration(0);
         climb1Config.smartCurrentLimit(40, 40);
         climb2Config.follow(climb1);
         climb1.configure(climb1Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         climb2.configure(climb2Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        climbController = climb1.getClosedLoopController();
+        climb1.getEncoder().setPosition(0);
+        climb2.getEncoder().setPosition(0);
+    }
+
+    public void moveArm(double setPoint) {
+        climbController.setSetpoint(setPoint, ControlType.kPosition);
+    }
+
+    public Command armUpCommand() {
+        return run(() -> moveArm(upSetpoint));
+    }
+
+    public Command armDownCommand() {
+        return run(() -> moveArm(downSetpoint));
     }
 
     @Override

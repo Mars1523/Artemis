@@ -188,6 +188,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return swerveDrive.getOdometryHeading();
     }
 
+    public ChassisSpeeds getChassisSpeeds() {
+        return swerveDrive.getFieldVelocity();
+    }
+
     public Pose2d getPose() {
         return swerveDrive.getPose();
     }
