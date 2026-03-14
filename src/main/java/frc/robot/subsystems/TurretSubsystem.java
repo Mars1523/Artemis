@@ -50,8 +50,8 @@ public class TurretSubsystem extends SubsystemBase {
                 .softLimit
                 .forwardSoftLimitEnabled(true)
                 .reverseSoftLimitEnabled(true)
-                .forwardSoftLimit(0.4)
-                .reverseSoftLimit(-0.4);
+                .forwardSoftLimit(0.675)
+                .reverseSoftLimit(-0.325);
         turretConfig.closedLoop.outputRange(-0.9, 0.9).pid(10, 0, 0);
 
         turretMotor.configure(turretConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
