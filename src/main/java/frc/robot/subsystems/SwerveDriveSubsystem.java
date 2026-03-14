@@ -209,6 +209,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public void periodic() {
         Logger.recordOutput("Swerve/Pose2D", swerveDrive.getPose());
         swerveDrive.updateOdometry();
+        Logger.recordOutput("Swerve/Pose2D", getPose());
     }
 
     public void acceptVisionData(Pose2d pose, double timestamp, Matrix<N3, N1> estimationStdDevs) {

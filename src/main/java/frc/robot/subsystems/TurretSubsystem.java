@@ -16,15 +16,17 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 // import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CanIdConstants;
+import frc.robot.NTDouble;
 import org.littletonrobotics.junction.Logger;
 
 public class TurretSubsystem extends SubsystemBase {
     // private Servo turret = new Servo(1);
     private SwerveDriveSubsystem swerve;
-    private SparkMax turretMotor = new SparkMax(41, MotorType.kBrushless);
+    private SparkMax turretMotor = new SparkMax(CanIdConstants.kTurretRotateCanId, MotorType.kBrushless);
     SparkClosedLoopController turretController;
-    private static final double minAngle = -0.48;
-    private static final double maxAngle = 0.48;
+    private static final double minAngle = -0.25;
+    private static final double maxAngle = 0.25;
 
     SparkMaxConfig turretConfig = new SparkMaxConfig();
     // for PID constants finding
@@ -35,25 +37,28 @@ public class TurretSubsystem extends SubsystemBase {
     TrapezoidProfile trapezoidProfile = new TrapezoidProfile(new Constraints(30, 10));
     TrapezoidProfile.State trapezoidSetpoint = new TrapezoidProfile.State();
 
+    double finalSetpoint;
+    NTDouble customSetpoint;
+
     public TurretSubsystem(SwerveDriveSubsystem swerve) {
         this.swerve = swerve;
 
         turretConfig.absoluteEncoder.zeroCentered(true);
         turretConfig.absoluteEncoder.inverted(true);
-        turretConfig.encoder.positionConversionFactor(0.01111111111111);
+        turretConfig.encoder.positionConversionFactor(0.01111111111111).velocityConversionFactor(0.01111111111111);
         turretConfig.absoluteEncoder.positionConversionFactor(1.5);
-        turretController = turretMotor.getClosedLoopController();
-        turretConfig.closedLoop.feedForward.kS(0.17).kV(0).kA(0);
-        turretConfig.closedLoop.maxMotion.cruiseVelocity(0).maxAcceleration(0);
-        turretConfig.smartCurrentLimit(40, 40);
+        turretConfig.closedLoop.feedForward.kS(0.17).kV(.127);
+        turretConfig.closedLoop.maxMotion.cruiseVelocity(10).maxAcceleration(10);
+        turretConfig.smartCurrentLimit(20, 20);
         turretConfig
                 .softLimit
                 .forwardSoftLimitEnabled(true)
                 .reverseSoftLimitEnabled(true)
                 .forwardSoftLimit(0.675)
                 .reverseSoftLimit(-0.325);
-        turretConfig.closedLoop.outputRange(-0.9, 0.9).pid(10, 0, 0);
+        turretConfig.closedLoop.outputRange(-0.8, 0.8).pid(10, 0, 0);
 
+        double startingPosition = turretMotor.getAbsoluteEncoder().getPosition();
         turretMotor.configure(turretConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         turretMotor.getEncoder().setPosition(turretMotor.getAbsoluteEncoder().getPosition());
 
@@ -100,9 +105,12 @@ public class TurretSubsystem extends SubsystemBase {
         return run(() -> shootAtHub());
     }
 
-    double finalSetpoint;
+    public Command setTurretAngleCommand(Rotation2d angle) {
+        return run(() -> setTurretAngle(angle));
+    }
 
-    public void setTurretSetpoint(Rotation2d angle) {
+    public void setTurretAngle(Rotation2d angle) {
+        Logger.recordOutput("Turret/SetTurretAngle", angle.getDegrees());
         double turretsetpoint = angle.getRotations();
         if (turretsetpoint > 0.675) {
             turretsetpoint -= 1;
@@ -156,7 +164,7 @@ public class TurretSubsystem extends SubsystemBase {
         Logger.recordOutput("Turret/robotPoseToHopperAngle", robotPoseToHopperAngle.getDegrees());
         // Constants.kField.;
         // turret.se(scaletarget.getDegrees());
-        setTurretSetpoint(robotPoseToHopperAngle);
+        setTurretAngle(robotPoseToHopperAngle);
     }
 
     public static boolean isRed() {
@@ -198,7 +206,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         var robotToTargetFieldAngle = target.minus(robotFieldPosition).getAngle();
         var robotPoseToTargetAngle = robotToTargetFieldAngle.minus(robotPoseAngle);
-        setTurretSetpoint(robotPoseToTargetAngle);
+        setTurretAngle(robotPoseToTargetAngle);
 
         // if(robotPoseToTargetAngle > 0){
 

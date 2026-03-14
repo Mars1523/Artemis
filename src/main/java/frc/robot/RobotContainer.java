@@ -24,7 +24,11 @@ public class RobotContainer {
     CommandJoystick primaryJoy = new CommandJoystick(0);
     CommandXboxController commandXboxController = new CommandXboxController(1);
     SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
+
+    // change to RobotOrientedControllerSwerve if preferred for testing
     DefaultSwerve defaultSwerve = new DefaultSwerve(primaryJoy.getHID(), swerveDriveSubsystem);
+    // RobotOrientedControllerSwerve defaultSwerve =
+    //        new RobotOrientedControllerSwerve(commandXboxController.getHID(), swerveDriveSubsystem);
 
     SendableChooser<Command> autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -44,7 +48,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("runIntake", fuelInputSubsystem.runIntake());
         NamedCommands.registerCommand("runIntakeReverse", fuelInputSubsystem.runIntakeReverse());
         NamedCommands.registerCommand("shootAtHomeCommand", turretSubsystem.shootAtHomeCommand());
-        NamedCommands.registerCommand("shootAtHub", turretSubsystem.shootAtHubCommand());
+        NamedCommands.registerCommand("shootAtHubCommand", turretSubsystem.shootAtHubCommand());
         configureAutos();
         configureBindings();
     }

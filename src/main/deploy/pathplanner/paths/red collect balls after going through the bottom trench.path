@@ -70,7 +70,14 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "runIntake",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 1.9,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -86,7 +93,7 @@
   "reversed": false,
   "folder": "Red Alliance",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 2.0,
     "rotation": 180.0
   },
   "useDefaultConstraints": true
