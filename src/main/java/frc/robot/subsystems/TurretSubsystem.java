@@ -56,6 +56,8 @@ public class TurretSubsystem extends SubsystemBase {
 
         turretMotor.configure(turretConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         turretMotor.getEncoder().setPosition(turretMotor.getAbsoluteEncoder().getPosition());
+
+        finalSetpoint = turretController.getSetpoint();
     }
 
     // private void setServoAngle(Rotation2d angle) {
@@ -102,7 +104,13 @@ public class TurretSubsystem extends SubsystemBase {
 
     public void setTurretSetpoint(Rotation2d angle) {
         double turretsetpoint = angle.getRotations();
-        double turretPos = turretMotor.getAbsoluteEncoder().getPosition();
+        if (turretsetpoint > 0.675) {
+            turretsetpoint -= 1;
+        }
+        if (turretsetpoint < -0.375) {
+            turretsetpoint += 1;
+        }
+        /*double turretPos = turretMotor.getAbsoluteEncoder().getPosition();
         finalSetpoint = turretsetpoint;
         if (turretsetpoint > 0 && turretPos < 0) {
             finalSetpoint = turretsetpoint - 1;
@@ -116,7 +124,8 @@ public class TurretSubsystem extends SubsystemBase {
             }
         } else {
             finalSetpoint = turretsetpoint;
-        }
+        }*/
+        finalSetpoint = turretsetpoint;
     }
 
     /*
@@ -209,8 +218,13 @@ public class TurretSubsystem extends SubsystemBase {
 
     Rotation2d i = new Rotation2d();
 
+    public Command turretting() {
+        return run(() -> turretController.setSetpoint(finalSetpoint, ControlType.kPosition));
+    }
+
     @Override
     public void periodic() {
+        Logger.recordOutput("Turret/finalSetpoint", finalSetpoint);
 
         /*
         i = i.plus(Rotation2d.fromDegrees(1));
@@ -221,6 +235,5 @@ public class TurretSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("ROtationFinal", finalSetpoint);
         */
         // System.err.println(".,");
-        turretController.setSetpoint(finalSetpoint, ControlType.kPosition);
     }
 }

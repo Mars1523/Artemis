@@ -16,6 +16,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -33,6 +35,7 @@ public class LauncherSubsystem extends SubsystemBase {
 
     TalonFX leftMotor = new TalonFX(CanIdConstants.kLeftShooterCanId);
     TalonFX rightMotor = new TalonFX(CanIdConstants.kRightShooterCanId);
+    private final SparkMax turretFeedMotor = new SparkMax(CanIdConstants.kTurretFeedCanId, MotorType.kBrushless);
 
     VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
@@ -159,8 +162,16 @@ public class LauncherSubsystem extends SubsystemBase {
     public double rps = 0;
 
     public Command shootVelocityCommand() {
-        return run(() -> shootVelocity(RotationsPerSecond.of(targetRps.get())))
-            .finallyDo(() -> leftMotor.set(0));
+        return run(() -> shootVelocity(RotationsPerSecond.of(rps))).finallyDo(() -> leftMotor.set(0));
+    }
+
+    public Command shootFeed() {
+        if (leftMotor.getVelocity().getValueAsDouble() > rps * 0.9
+                && leftMotor.getVelocity().getValueAsDouble() < rps * 1.1) {
+            return run(() -> turretFeedMotor.set(0.4));
+        } else {
+            return run(() -> turretFeedMotor.set(0));
+        }
     }
 
     public void shootVelocity(AngularVelocity speed) {
@@ -170,6 +181,10 @@ public class LauncherSubsystem extends SubsystemBase {
     public void shootDistance(double distance) {
         double rps = launcherRpsForDistance(distance);
         shootVelocity(AngularVelocity.ofBaseUnits(rps, RotationsPerSecond));
+    }
+
+    public void shootDistance1(double distance) {
+        rps = launcherRpsForDistance(distance);
     }
 
     // Used the Exel data sheet On discord in the programming general channel for the equation and data points
@@ -189,30 +204,30 @@ public class LauncherSubsystem extends SubsystemBase {
             }
         }*/
 
-
-        //launcherRps = -2.0e-06 * Math.pow(distance, 3) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
+        // launcherRps = -2.0e-06 * Math.pow(distance, 3) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
         double a = -1.29e-06;
         double b = 9.63e-04;
         double c = 1.72e-02;
         double d = 3.99e01;
-        double launcherRps = a * Math.pow(distance, 3) + b * Math.pow(distance, 2) + c * distance + d;
+        double distanceInches = distance * 39.37;
+        double launcherRps = a * Math.pow(distanceInches, 3) + b * Math.pow(distanceInches, 2) + c * distanceInches + d;
         return launcherRps;
     }
 
-    public Command shootPhotonCommand() {
+    /*public Command shootPhotonCommand() {
         return run(() -> shootPhoton())
             .finallyDo(() -> setMotorDuty(0));
-    }
+    }*/
 
-    public void shootPhoton() {
+    /*public void shootPhoton() {
         double distance = targetDistance.get();
-        rps = launcherRpsForDistance(distance);
+        rps = launcherRpsForDistance(Distance.ofBaseUnits(distance, distance);
         Logger.recordOutput("flywheel/speedRPS", rps);
-    }
+    }*/
 
     @Override
     public void periodic() {
-        shootPhoton();
+        // shootPhoton();
         // This method will be called once per scheduler run
         Logger.recordOutput(leftMotorRpsEntry, leftMotor.getVelocity().getValueAsDouble());
         Logger.recordOutput(rightMotorRpsEntry, rightMotor.getVelocity().getValueAsDouble());
@@ -220,5 +235,6 @@ public class LauncherSubsystem extends SubsystemBase {
         Logger.recordOutput(rightMotorPositionEntry, rightMotor.getPosition().getValueAsDouble());
         Logger.recordOutput(leftMotorVoltageEntry, leftMotor.getMotorVoltage().getValueAsDouble());
         Logger.recordOutput(rightMotorVoltageEntry, rightMotor.getMotorVoltage().getValueAsDouble());
+        Logger.recordOutput("Launcher/LauncherRPS", launcherRpsForDistance(rps));
     }
 }

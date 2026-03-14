@@ -21,7 +21,6 @@ public class FuelInputSubsystem extends SubsystemBase {
     private final SparkMax hopperMotor = new SparkMax(CanIdConstants.kHopperCanId, MotorType.kBrushless);
 
     // blue motor under the turret
-    private final SparkMax turretFeedMotor = new SparkMax(CanIdConstants.kTurretFeedCanId, MotorType.kBrushless);
 
     private final SparkMax intakeArm = new SparkMax(CanIdConstants.kIntakeArmCanId, MotorType.kBrushless);
 
@@ -32,11 +31,9 @@ public class FuelInputSubsystem extends SubsystemBase {
 
     NTDouble intakeMotorSpeed = new NTDouble(0.5, "intakeMotorSpeed");
     NTDouble hopperMotorSpeed = new NTDouble(0.5, "hopperMotorSpeed");
-    NTDouble turretFeedMotorSpeed = new NTDouble(0.8, "turretFeedMotorSpeed");
 
     NTDouble intakeMotorReverseSpeed = new NTDouble(-0.5, "intakeMotorReverseSpeed");
     NTDouble hopperMotorReverseSpeed = new NTDouble(-0.5, "hopperMotorReverseSpeed");
-    NTDouble turretFeedMotorReverseSpeed = new NTDouble(-0.8, "turretFeedMotorReverseSpeed");
 
     public FuelInputSubsystem() {
         intakeMotor.configure(
@@ -67,12 +64,10 @@ public class FuelInputSubsystem extends SubsystemBase {
         return Commands.run(() -> {
                     intakeMotor.set(intakeMotorSpeed.get());
                     hopperMotor.set(hopperMotorSpeed.get());
-                    turretFeedMotor.set(turretFeedMotorSpeed.get());
                 })
                 .finallyDo(() -> {
                     intakeMotor.set(0);
                     hopperMotor.set(0);
-                    turretFeedMotor.set(0);
                 });
     }
 
@@ -81,12 +76,10 @@ public class FuelInputSubsystem extends SubsystemBase {
         return Commands.run(() -> {
                     intakeMotor.set(intakeMotorReverseSpeed.get());
                     hopperMotor.set(hopperMotorReverseSpeed.get());
-                    turretFeedMotor.set(turretFeedMotorReverseSpeed.get());
                 })
                 .finallyDo(() -> {
                     intakeMotor.set(0);
                     hopperMotor.set(0);
-                    turretFeedMotor.set(0);
                 });
     }
 
