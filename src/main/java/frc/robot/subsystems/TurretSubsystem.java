@@ -135,7 +135,6 @@ public class TurretSubsystem extends SubsystemBase {
 
     public void shootAtHub() {
         var robotFieldPosition = swerve.getPose().getTranslation();
-        if (robotFieldPosition.getX() == 0 && robotFieldPosition.getY() == 0) return;
         var robotPoseAngle = swerve.getPose().getRotation();
         var robotToHopperFieldAngle = targetHopper().minus(robotFieldPosition).getAngle();
         var robotPoseToHopperAngle = robotToHopperFieldAngle.minus(robotPoseAngle);
