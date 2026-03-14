@@ -47,7 +47,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("runIntake", fuelInputSubsystem.runIntake());
         NamedCommands.registerCommand("runIntakeReverse", fuelInputSubsystem.runIntakeReverse());
         NamedCommands.registerCommand("shootAtHomeCommand", turretSubsystem.shootAtHomeCommand());
-        NamedCommands.registerCommand("shootAtHub", turretSubsystem.shootAtHubCommand());
+        NamedCommands.registerCommand("shootAtHubCommand", turretSubsystem.shootAtHubCommand());
         configureAutos();
         configureBindings();
     }
