@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 11.0,
+        "x": 5.5,
         "y": 7.3
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.542385051211252,
+        "x": 6.5,
         "y": 7.3
       },
       "isLocked": false,
@@ -16,44 +16,44 @@
     },
     {
       "anchor": {
-        "x": 8.313,
-        "y": 5.838202380948601
+        "x": 5.795867267765411,
+        "y": 6.232914637735445
       },
       "prevControl": {
-        "x": 8.313,
-        "y": 6.4444232027675366
+        "x": 6.045513096639556,
+        "y": 6.530790948737158
       },
       "nextControl": {
-        "x": 8.313,
-        "y": 4.032600767364516
+        "x": 5.635284417721871,
+        "y": 6.0413078834915135
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.313,
-        "y": 0.7254182496789372
+        "x": 5.681448790667808,
+        "y": 1.5489158149614717
       },
       "prevControl": {
-        "x": 8.278113458246777,
-        "y": 1.294544700994655
+        "x": 5.574940122369376,
+        "y": 1.7750925237033193
       },
       "nextControl": {
-        "x": 8.335156651327056,
-        "y": 0.363962636451198
+        "x": 5.908294499151576,
+        "y": 1.0671971289920734
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 11.0,
+        "x": 5.5,
         "y": 0.65
       },
       "prevControl": {
-        "x": 9.75892959385702,
-        "y": 0.8698581977739729
+        "x": 6.207252046767979,
+        "y": 0.8331633267337326
       },
       "nextControl": null,
       "isLocked": false,
@@ -62,11 +62,11 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5792531120332207,
+      "waypointRelativePos": 1,
       "rotationDegrees": -90.0
     },
     {
-      "waypointRelativePos": 1.7503962862318843,
+      "waypointRelativePos": 1.9460484601449257,
       "rotationDegrees": -90.0
     }
   ],
@@ -75,8 +75,8 @@
   "eventMarkers": [
     {
       "name": "runIntake",
-      "waypointRelativePos": 1.6653345369377348e-16,
-      "endWaypointRelativePos": 1.8,
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 3.0,
       "command": null
     }
   ],
@@ -90,13 +90,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Red alliance",
+  "folder": "Blue alliance",
   "idealStartingState": {
-    "velocity": 2.0,
-    "rotation": 180.0
+    "velocity": 0,
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

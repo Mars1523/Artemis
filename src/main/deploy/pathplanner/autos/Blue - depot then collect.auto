@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeDown"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depot from top blue"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeUp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "blue center to bottom trench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "blue go through bottom trench"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeDown"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "blue collect balls after going through the bottom trench"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeUp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "neutral to blue top trench"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Blue alliance",
+  "choreoAuto": false
+}
