@@ -58,8 +58,8 @@ public class PhotonCameraSubsystem extends SubsystemBase {
         this.estConsumer = estConsumer;
         this.yawRateRadPerSec = yawRateRadPerSec;
 
-        cams.add(new Cam("Camera1", new PhotonPoseEstimator(kTagLayout, kRobotToCamera1)));
-        cams.add(new Cam("Camera2", new PhotonPoseEstimator(kTagLayout, kRobotToCamera2)));
+        cams.add(new Cam("leftCamera", new PhotonPoseEstimator(kTagLayout, kRobotToCamera1)));
+        cams.add(new Cam("rightCamera", new PhotonPoseEstimator(kTagLayout, kRobotToCamera2)));
         // Replace Camera with whatever name you want. Theoretically you could also add more cameras
     }
 

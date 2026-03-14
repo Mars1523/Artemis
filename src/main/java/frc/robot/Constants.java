@@ -77,7 +77,6 @@ public final class Constants {
         // Guy's Constants: (Status: Not Implemented)
         // To add additional cameras or change the Camera names, simply add aditional cameras.
         // I think its safe to remove all but one camera... I think...
-        public static final String[] kPhotonCameraNames = {"leftCamera", "rightCamera"};
 
         public static final Transform3d kRobotToCamera1 = new Transform3d(
                 new Translation3d(-.2159, 0.2794, 0.2667),
@@ -85,8 +84,6 @@ public final class Constants {
         public static final Transform3d kRobotToCamera2 = new Transform3d(
                 new Translation3d(.0127, -.3048, .2921),
                 new Rotation3d(0, Units.degreesToRadians(5), Units.degreesToRadians(180 + 20)));
-
-        public static final Transform3d[] kRobotToCams = {kRobotToCamera1, kRobotToCamera2};
 
         public static final double maxPoseAmbiguity = 0.2;
         public static final double maxYawRate = Units.degreesToRadians(200);

@@ -16,6 +16,7 @@ import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.AutoRotate;
 import frc.robot.subsystems.FuelInputSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
+import frc.robot.subsystems.PhotonCameraSubsystem;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 
@@ -31,6 +32,9 @@ public class RobotContainer {
     LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
 
     TurretSubsystem turretSubsystem = new TurretSubsystem(swerveDriveSubsystem);
+
+    PhotonCameraSubsystem photonCameraSubsystem =
+            new PhotonCameraSubsystem(swerveDriveSubsystem::acceptVisionData, () -> swerveDriveSubsystem.getRobotVelocity().omegaRadiansPerSecond);
 
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
