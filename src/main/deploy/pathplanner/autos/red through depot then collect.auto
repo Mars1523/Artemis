@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeDown"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red depot from bottom"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red center to top trench"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeUp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "red go through top trench"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeDown"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "red collect balls after going through the top trench"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeUp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "neutral to red bottom trench"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Red alliance",
+  "choreoAuto": false
+}

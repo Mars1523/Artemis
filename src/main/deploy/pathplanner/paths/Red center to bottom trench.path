@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 15.0,
-        "y": 7.0
+        "x": 14.0,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 15.25,
-        "y": 7.0
+        "x": 13.77610104077483,
+        "y": 2.714334131528253
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 14.0,
-        "y": 4.0
+        "x": 13.0,
+        "y": 0.65
       },
       "prevControl": {
-        "x": 13.75,
-        "y": 4.0
+        "x": 13.479256073416098,
+        "y": 1.520705532962328
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,7 @@
   "reversed": false,
   "folder": "Red alliance",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 0.0,
     "rotation": 180.0
   },
   "useDefaultConstraints": true
