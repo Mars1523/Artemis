@@ -22,6 +22,8 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -85,7 +87,7 @@ public class LauncherSubsystem extends SubsystemBase {
 
     public LauncherSubsystem() {
         turretFeedMotor.configure(
-                new SparkMaxConfig().smartCurrentLimit(20),
+                new SparkMaxConfig().smartCurrentLimit(20).idleMode(IdleMode.kBrake),
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
