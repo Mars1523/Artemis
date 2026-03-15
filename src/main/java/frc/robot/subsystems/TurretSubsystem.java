@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
@@ -114,7 +116,13 @@ public class TurretSubsystem extends SubsystemBase {
         if (turretsetpoint < -0.375) {
             turretsetpoint += 1;
         }
+        Logger.recordOutput("Turret/setpoint", turretsetpoint);
         turretController.setSetpoint(turretsetpoint, ControlType.kPosition);
+    }
+
+    public Rotation2d getTurretAngle() {
+        double currentSetpoint = turretController.getSetpoint();
+        return new Rotation2d(Rotations.of(currentSetpoint));
     }
 
     public void shootAtHub() {

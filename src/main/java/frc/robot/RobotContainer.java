@@ -4,11 +4,16 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
@@ -19,6 +24,7 @@ import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.PhotonCameraSubsystem;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
+import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
     CommandJoystick primaryJoy = new CommandJoystick(0);
@@ -35,13 +41,43 @@ public class RobotContainer {
     FuelInputSubsystem fuelInputSubsystem = new FuelInputSubsystem();
     LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
     TurretSubsystem turretSubsystem = new TurretSubsystem(swerveDriveSubsystem);
-    AimingSub aimSub = new AimingSub(swerveDriveSubsystem, turretSubsystem, launcherSubsystem);
+    // AimingSub aimSub = new AimingSub(swerveDriveSubsystem, turretSubsystem,
+    // launcherSubsystem);
     PhotonCameraSubsystem photonCameraSubsystem = new PhotonCameraSubsystem(
             swerveDriveSubsystem::acceptVisionData,
             () -> swerveDriveSubsystem.getRobotVelocity().omegaRadiansPerSecond);
 
+    AimingSub aimingSub = new AimingSub(swerveDriveSubsystem, turretSubsystem, launcherSubsystem);
+
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
+
+        aimingSub.setDefaultCommand(aimingSub.pointTurretPhotonCommand());
+
+        Command aimCommand = Commands.run(
+                () -> {
+                    double input =
+                            -commandXboxController.getLeftTriggerAxis() + commandXboxController.getRightTriggerAxis();
+                    final double factor = 0.01;
+                    Rotation2d currAngle = aimingSub.getAngle();
+                    Rotation2d newAngle = new Rotation2d(Rotations.of(currAngle.getRotations() + (input * factor)));
+                    aimingSub.setAngle(newAngle);
+                },
+                aimingSub);
+
+        commandXboxController
+                .start()
+                .onTrue(Commands.runOnce(
+                        () -> {
+                            CommandScheduler.getInstance().schedule(aimCommand);
+                        },
+                        aimingSub));
+
+        commandXboxController.back().onTrue(Commands.runOnce(() -> {
+            Logger.recordOutput("Controller/Back", true);
+            CommandScheduler.getInstance().cancel(aimCommand);
+        }));
+
         NamedCommands.registerCommand("shootVelocityCommand", launcherSubsystem.shootVelocityCommand());
         NamedCommands.registerCommand("intakeUp", fuelInputSubsystem.intakeUp());
         NamedCommands.registerCommand("intakeDown", fuelInputSubsystem.intakeDown());
@@ -61,10 +97,7 @@ public class RobotContainer {
     private void configureBindings() {
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
         commandXboxController.a().whileTrue(fuelInputSubsystem.runIntake());
-        commandXboxController.x().whileTrue(aimSub.shootCommand());
-        // commandXboxController
-        //         .b()
-        //         .whileTrue(launcherSubsystem.shootVelocityCommand().andThen(launcherSubsystem.shootFeed()));
+        commandXboxController.x().whileTrue(aimingSub.shootPhotonCommand());
         commandXboxController.rightBumper().onTrue(fuelInputSubsystem.intakeUp());
         commandXboxController.leftBumper().onTrue(fuelInputSubsystem.intakeDown());
     }
