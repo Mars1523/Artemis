@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.RobotOrientedControllerSwerve;
+import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.AutoRotate;
 import frc.robot.subsystems.AimingSub;
 import frc.robot.subsystems.FuelInputSubsystem;
@@ -26,9 +26,9 @@ public class RobotContainer {
     SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
 
     // change to RobotOrientedControllerSwerve if preferred for testing
-    // DefaultSwerve defaultSwerve = new DefaultSwerve(primaryJoy.getHID(), swerveDriveSubsystem);
-    RobotOrientedControllerSwerve defaultSwerve =
-            new RobotOrientedControllerSwerve(commandXboxController.getHID(), swerveDriveSubsystem);
+    DefaultSwerve defaultSwerve = new DefaultSwerve(primaryJoy.getHID(), swerveDriveSubsystem);
+    // RobotOrientedControllerSwerve defaultSwerve =
+    //         new RobotOrientedControllerSwerve(commandXboxController.getHID(), swerveDriveSubsystem);
 
     SendableChooser<Command> autoChooser = AutoBuilder.buildAutoChooser();
 

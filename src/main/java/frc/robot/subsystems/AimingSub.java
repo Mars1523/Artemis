@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
 public class AimingSub extends SubsystemBase {
+    private static final Translation2d centerOffset = new Translation2d(0.0762, 0.0635);
     private SwerveDriveSubsystem swerveDriveSubsystem;
     private TurretSubsystem turretSubsystem;
     private LauncherSubsystem launcherSubsystem;
@@ -46,10 +47,8 @@ public class AimingSub extends SubsystemBase {
     }
 
     public Translation2d getCoordinates(Translation2d hubPosition) {
-        var robotFieldPosition = swerveDriveSubsystem.getPose().getTranslation();
         robotPoseAngle = swerveDriveSubsystem.getPose().getRotation();
-        robotToHopperFieldAngle = (hubPosition.minus(robotFieldPosition)).getAngle();
-        robotPoseToHopperAngle = robotToHopperFieldAngle.minus(robotPoseAngle);
+        var robotFieldPosition = swerveDriveSubsystem.getPose().getTranslation().plus(centerOffset.rotateBy(robotPoseAngle));
 
         Translation2d finalTranslation = hubPosition.minus(robotFieldPosition);
         double xV = swerveDriveSubsystem.getChassisSpeeds().vxMetersPerSecond;
@@ -64,9 +63,12 @@ public class AimingSub extends SubsystemBase {
             Translation2d compensation = new Translation2d(xV * time.abs(Seconds), yV * time.abs(Seconds));
             Logger.recordOutput("Aiming/Compensation" + i, compensation);
             Logger.recordOutput("Aiming/time" + i, time.abs(Seconds));
-            finalTranslation = hubPosition.minus(robotFieldPosition).minus(compensation);
-            hubDistance = Meters.of(finalTranslation.getNorm());
+            finalTranslation = hubPosition.minus(compensation);
+            hubDistance = Meters.of(finalTranslation.minus(robotFieldPosition).getNorm());
             time = getTime(hubDistance);
+
+            robotToHopperFieldAngle = (finalTranslation.minus(robotFieldPosition)).getAngle();
+            robotPoseToHopperAngle = robotToHopperFieldAngle.minus(robotPoseAngle);
         }
 
         return finalTranslation;
