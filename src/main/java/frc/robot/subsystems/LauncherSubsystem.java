@@ -180,7 +180,7 @@ public class LauncherSubsystem extends SubsystemBase {
 
     public void shootDistance(double distance) {
         double rps = launcherRpsForDistance(distance);
-        shootVelocity(AngularVelocity.ofBaseUnits(rps, RotationsPerSecond));
+        shootVelocity(RotationsPerSecond.of(rps));
     }
 
     public void shootDistance1(double distance) {

@@ -11,6 +11,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -23,6 +24,7 @@ public class AimingSub extends SubsystemBase {
     private Translation2d redHub = new Translation2d(11.945, 3.990);
     Rotation2d robotToHopperFieldAngle;
     Rotation2d robotPoseToHopperAngle;
+    Rotation2d robotPoseAngle;
 
     public AimingSub(
             SwerveDriveSubsystem swerveDriveSubsystem,
@@ -44,7 +46,11 @@ public class AimingSub extends SubsystemBase {
     }
 
     public Translation2d getCoordinates(Translation2d hubPosition) {
-        Translation2d robotFieldPosition = swerveDriveSubsystem.getPose().getTranslation();
+        var robotFieldPosition = swerveDriveSubsystem.getPose().getTranslation();
+        robotPoseAngle = swerveDriveSubsystem.getPose().getRotation();
+        robotToHopperFieldAngle = (hubPosition.minus(robotFieldPosition)).getAngle();
+        robotPoseToHopperAngle = robotToHopperFieldAngle.minus(robotPoseAngle);
+
         Translation2d finalTranslation = hubPosition.minus(robotFieldPosition);
         double xV = swerveDriveSubsystem.getChassisSpeeds().vxMetersPerSecond;
         double yV = swerveDriveSubsystem.getChassisSpeeds().vyMetersPerSecond;
@@ -66,17 +72,26 @@ public class AimingSub extends SubsystemBase {
         return finalTranslation;
     }
 
-    @Override
-    public void periodic() {
+    public Command shootCommand() {
+        return run(() -> shoot()).finallyDo(() -> launcherSubsystem.setMotorDuty(0));
+    }
+
+    public void shoot() {
         Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
         Translation2d hubPose = alliance == Alliance.Red ? redHub : blueHub;
         Translation2d finalTranslation = getCoordinates(hubPose);
         Logger.recordOutput("Aiming/FinalTranslation", finalTranslation);
-        turretSubsystem.setTurretSetpoint(finalTranslation.getAngle().unaryMinus());
-        launcherSubsystem.shootDistance1(finalTranslation.getNorm());
-        Time estimatedTime = getTime(Distance.ofBaseUnits(finalTranslation.getNorm(), Meters));
+        Logger.recordOutput("Aiming/TurretAngle", finalTranslation.getAngle().unaryMinus());
+
+        turretSubsystem.setTurretAngle(robotPoseToHopperAngle.unaryMinus());
+        launcherSubsystem.shootDistance(finalTranslation.getNorm());
+
+        Time estimatedTime = getTime(Meters.of(finalTranslation.getNorm()));
         Logger.recordOutput("Aiming/EstimatedTime", estimatedTime.abs(Seconds));
         Logger.recordOutput("Aiming/RobotFieldAngle", robotToHopperFieldAngle);
         Logger.recordOutput("Aiming/RobotHopperAngle", robotToHopperFieldAngle);
     }
+
+    @Override
+    public void periodic() {}
 }

@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CanIdConstants;
-import frc.robot.NTDouble;
 import org.littletonrobotics.junction.Logger;
 
 public class TurretSubsystem extends SubsystemBase {
@@ -37,9 +36,6 @@ public class TurretSubsystem extends SubsystemBase {
     TrapezoidProfile trapezoidProfile = new TrapezoidProfile(new Constraints(30, 10));
     TrapezoidProfile.State trapezoidSetpoint = new TrapezoidProfile.State();
 
-    double finalSetpoint;
-    NTDouble customSetpoint;
-
     public TurretSubsystem(SwerveDriveSubsystem swerve) {
         this.swerve = swerve;
 
@@ -58,11 +54,10 @@ public class TurretSubsystem extends SubsystemBase {
                 .reverseSoftLimit(-0.325);
         turretConfig.closedLoop.outputRange(-0.8, 0.8).pid(10, 0, 0);
 
-        double startingPosition = turretMotor.getAbsoluteEncoder().getPosition();
+        turretController = turretMotor.getClosedLoopController();
+
         turretMotor.configure(turretConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         turretMotor.getEncoder().setPosition(turretMotor.getAbsoluteEncoder().getPosition());
-
-        finalSetpoint = turretController.getSetpoint();
     }
 
     // private void setServoAngle(Rotation2d angle) {
@@ -118,37 +113,8 @@ public class TurretSubsystem extends SubsystemBase {
         if (turretsetpoint < -0.375) {
             turretsetpoint += 1;
         }
-        /*double turretPos = turretMotor.getAbsoluteEncoder().getPosition();
-        finalSetpoint = turretsetpoint;
-        if (turretsetpoint > 0 && turretPos < 0) {
-            finalSetpoint = turretsetpoint - 1;
-            if (finalSetpoint < -0.6) {
-                finalSetpoint = turretsetpoint;
-            }
-        } else if (turretsetpoint < 0 && turretPos > 0) {
-            finalSetpoint = turretsetpoint + 1;
-            if (finalSetpoint > 0.6) {
-                finalSetpoint = turretsetpoint;
-            }
-        } else {
-            finalSetpoint = turretsetpoint;
-        }*/
-        finalSetpoint = turretsetpoint;
+        turretController.setSetpoint(turretsetpoint, ControlType.kPosition);
     }
-
-    /*
-    public void shootAtHopperPhoton() {
-        // Hopper aiming for testing. Photon.
-        var result = photon.getLastResult();
-        PhotonTrackedTarget target = result.getBestTarget();
-        if (!result.hasTargets() || target == null) {
-                turretMotor.set(0);
-        *+ } else {
-            Transform3d bestCameratoTarget = target.getBestCameraToTarget();
-            double angle = bestCameratoTarget.getRotation().getZ();
-            setTurretSetpoint(angle / (2*Math.PI));
-        }
-    }*/
 
     public void shootAtHub() {
         var robotFieldPosition = swerve.getPose().getTranslation();
@@ -214,26 +180,14 @@ public class TurretSubsystem extends SubsystemBase {
 
     }
 
-    public boolean isPastBack() {
-        if ((turretMotor.getEncoder().getPosition() > 0.55
-                        || turretMotor.getEncoder().getPosition() < -0.55)
-                && Math.abs(finalSetpoint) < 0.2) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    Rotation2d i = new Rotation2d();
-
+    /*
     public Command turretting() {
         return run(() -> turretController.setSetpoint(finalSetpoint, ControlType.kPosition));
     }
+        */
 
     @Override
     public void periodic() {
-        Logger.recordOutput("Turret/finalSetpoint", finalSetpoint);
-
         /*
         i = i.plus(Rotation2d.fromDegrees(1));
         setTurretSetpoint(i);
