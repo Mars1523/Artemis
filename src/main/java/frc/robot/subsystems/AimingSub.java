@@ -85,41 +85,33 @@ public class AimingSub extends SubsystemBase {
         var robotFieldPosition =
                 swerveDriveSubsystem.getPose().getTranslation().plus(centerOffset.rotateBy(robotPoseAngle));
 
-        Translation2d finalTranslation = hubPosition.minus(robotFieldPosition);
+        Translation2d robotToHub = hubPosition.minus(robotFieldPosition);
         double xV = swerveDriveSubsystem.getChassisSpeeds().vxMetersPerSecond;
         double yV = swerveDriveSubsystem.getChassisSpeeds().vyMetersPerSecond;
-        Logger.recordOutput("Aiming/xV", xV);
-        Logger.recordOutput("Aiming/yV", yV);
-        Distance hubDistance = Meters.of(finalTranslation.getNorm());
+        Distance hubDistance = Meters.of(robotToHub.getNorm());
         Time time = getTime(hubDistance);
 
         for (int i = 0; i < 4; i++) {
-            Logger.recordOutput("Aiming/FinalTranslation" + i, finalTranslation);
             Translation2d compensation = new Translation2d(xV * time.abs(Seconds), yV * time.abs(Seconds));
-            Logger.recordOutput("Aiming/Compensation" + i, compensation);
-            Logger.recordOutput("Aiming/time" + i, time.abs(Seconds));
-            finalTranslation = hubPosition.minus(compensation);
-            hubDistance = Meters.of(finalTranslation.minus(robotFieldPosition).getNorm());
+            robotToHub = hubPosition.minus(robotFieldPosition).minus(compensation);
+            hubDistance = Meters.of(robotToHub.getNorm());
             time = getTime(hubDistance);
         }
 
-        Rotation2d robotToHopperFieldAngle =
-                finalTranslation.minus(robotFieldPosition).getAngle();
-        Rotation2d robotPoseToHopperAngle = robotToHopperFieldAngle.minus(robotPoseAngle);
-        Rotation2d turretAngle = robotPoseToHopperAngle.unaryMinus();
+        // Rotation2d halfRotation = Math.PI;
+        Rotation2d robotToHubFieldAngle = robotToHub.getAngle();
+        Rotation2d robotPoseToHubAngle = robotToHubFieldAngle.minus(robotPoseAngle);
+        Distance robotToHubDistance = Meters.of(robotToHub.getNorm());
 
-        Logger.recordOutput("Aiming/robotToHopperFieldAngle", robotToHopperFieldAngle);
-        Logger.recordOutput("Aiming/robotPoseToHopperAngle", robotPoseToHopperAngle);
-        Logger.recordOutput("Aiming/TurretAngle", turretAngle);
+        Logger.recordOutput("Aiming/robotToHopperFieldAngle", robotToHubFieldAngle);
+        Logger.recordOutput("Aiming/robotPoseToHopperAngle", robotPoseToHubAngle);
 
-        turretSubsystem.setTurretAngle(robotPoseToHopperAngle.unaryMinus());
-        launcherSubsystem.shootDistance(finalTranslation.getNorm());
+        turretSubsystem.setTurretAngle(robotPoseToHubAngle.unaryMinus());
+        launcherSubsystem.shootDistance(robotToHubDistance);
 
-        // Time estimatedTime = getTime(Meters.of(finalTranslation.getNorm()));
-        // Logger.recordOutput("Aiming/FinalTranslation", finalTranslation);
-        // Logger.recordOutput("Aiming/EstimatedTime", estimatedTime.abs(Seconds));
-        // Logger.recordOutput("Aiming/RobotFieldAngle", robotToHopperFieldAngle);
-        // Logger.recordOutput("Aiming/RobotHopperAngle", robotToHopperFieldAngle);
+        Time estimatedTime = getTime(Meters.of(robotToHub.getNorm()));
+        Logger.recordOutput("Aiming/EstimatedTime", estimatedTime);
+        Logger.recordOutput("Aiming/robotToHubDistance", robotToHubDistance);
     }
 
     @Override

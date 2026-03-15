@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -20,6 +21,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -178,18 +180,14 @@ public class LauncherSubsystem extends SubsystemBase {
         leftMotor.setControl(velocityRequest.withVelocity(speed));
     }
 
-    public void shootDistance(double distance) {
-        double rps = launcherRpsForDistance(distance);
-        shootVelocity(RotationsPerSecond.of(rps));
-    }
-
-    public void shootDistance1(double distance) {
-        rps = launcherRpsForDistance(distance);
+    public void shootDistance(Distance distance) {
+        AngularVelocity rps = launcherRpsForDistance(distance);
+        shootVelocity(rps);
     }
 
     // Used the Exel data sheet On discord in the programming general channel for the equation and data points
     // fit using cubic
-    public double launcherRpsForDistance(double distance) {
+    public AngularVelocity launcherRpsForDistance(Distance distance) {
         // returns rps
 
         // double[] distances = {63,89,140,168,188,203,227};
@@ -209,9 +207,9 @@ public class LauncherSubsystem extends SubsystemBase {
         double b = 9.63e-04;
         double c = 1.72e-02;
         double d = 3.99e01;
-        double distanceInches = distance * 39.37;
+        double distanceInches = distance.abs(Inches);
         double launcherRps = a * Math.pow(distanceInches, 3) + b * Math.pow(distanceInches, 2) + c * distanceInches + d;
-        return launcherRps;
+        return RotationsPerSecond.of(launcherRps);
     }
 
     /*public Command shootPhotonCommand() {
@@ -235,6 +233,5 @@ public class LauncherSubsystem extends SubsystemBase {
         Logger.recordOutput(rightMotorPositionEntry, rightMotor.getPosition().getValueAsDouble());
         Logger.recordOutput(leftMotorVoltageEntry, leftMotor.getMotorVoltage().getValueAsDouble());
         Logger.recordOutput(rightMotorVoltageEntry, rightMotor.getMotorVoltage().getValueAsDouble());
-        Logger.recordOutput("Launcher/LauncherRPS", launcherRpsForDistance(rps));
     }
 }
