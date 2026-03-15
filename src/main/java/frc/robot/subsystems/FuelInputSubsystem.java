@@ -20,8 +20,6 @@ public class FuelInputSubsystem extends SubsystemBase {
     // red bars inside the robot
     private final SparkMax hopperMotor = new SparkMax(CanIdConstants.kHopperCanId, MotorType.kBrushless);
 
-    // blue motor under the turret
-
     private final SparkMax intakeArm = new SparkMax(CanIdConstants.kIntakeArmCanId, MotorType.kBrushless);
 
     public double intakeArmUpPosition = 0;

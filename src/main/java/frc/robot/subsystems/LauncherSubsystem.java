@@ -37,7 +37,11 @@ public class LauncherSubsystem extends SubsystemBase {
 
     TalonFX leftMotor = new TalonFX(CanIdConstants.kLeftShooterCanId);
     TalonFX rightMotor = new TalonFX(CanIdConstants.kRightShooterCanId);
+
+    // blue motor under the turret
     private final SparkMax turretFeedMotor = new SparkMax(CanIdConstants.kTurretFeedCanId, MotorType.kBrushless);
+    public final double kTurretFeedDuty = 0.5;
+    public final double kMinRpsToRunTurretFeed = 40;
 
     VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
@@ -167,13 +171,12 @@ public class LauncherSubsystem extends SubsystemBase {
         return run(() -> shootVelocity(RotationsPerSecond.of(rps))).finallyDo(() -> leftMotor.set(0));
     }
 
-    public Command shootFeed() {
-        if (leftMotor.getVelocity().getValueAsDouble() > rps * 0.9
-                && leftMotor.getVelocity().getValueAsDouble() < rps * 1.1) {
-            return run(() -> turretFeedMotor.set(0.4));
-        } else {
-            return run(() -> turretFeedMotor.set(0));
+    public void runFeedIfReady() {
+        double turretFeedDuty = 0;
+        if (leftMotor.getVelocity().getValueAsDouble() > kMinRpsToRunTurretFeed) {
+            turretFeedDuty = kTurretFeedDuty;
         }
+        turretFeedMotor.set(turretFeedDuty);
     }
 
     public void shootVelocity(AngularVelocity speed) {
@@ -183,6 +186,11 @@ public class LauncherSubsystem extends SubsystemBase {
     public void shootDistance(Distance distance) {
         AngularVelocity rps = launcherRpsForDistance(distance);
         shootVelocity(rps);
+    }
+
+    public void turnOff() {
+        leftMotor.set(0);
+        turretFeedMotor.set(0);
     }
 
     // Used the Exel data sheet On discord in the programming general channel for the equation and data points
