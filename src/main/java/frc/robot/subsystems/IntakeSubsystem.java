@@ -15,7 +15,7 @@ import frc.robot.Constants.CanIdConstants;
 import frc.robot.NTDouble;
 import org.littletonrobotics.junction.Logger;
 
-public class FuelInputSubsystem extends SubsystemBase {
+public class IntakeSubsystem extends SubsystemBase {
     // absolute all the way up = 0.713
     // absolute all the way down = 0.4605
     // use diff of 0.002
@@ -38,7 +38,7 @@ public class FuelInputSubsystem extends SubsystemBase {
     SparkMaxConfig intakeArmConfig;
     NTDouble intakeArmP = new NTDouble(0.001, "intakeArmP");
 
-    public FuelInputSubsystem() {
+    public IntakeSubsystem() {
         intakeMotor.configure(
                 new SparkMaxConfig().smartCurrentLimit(20).inverted(true),
                 ResetMode.kResetSafeParameters,
