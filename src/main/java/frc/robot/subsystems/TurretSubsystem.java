@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -52,7 +53,7 @@ public class TurretSubsystem extends SubsystemBase {
                 .reverseSoftLimitEnabled(true)
                 .forwardSoftLimit(0.675)
                 .reverseSoftLimit(-0.325);
-        turretConfig.closedLoop.outputRange(-0.8, 0.8).pid(10, 0, 0);
+        turretConfig.closedLoop.outputRange(-0.8, 0.8).pid(10, 0, 0).feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
         turretController = turretMotor.getClosedLoopController();
 
