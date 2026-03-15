@@ -16,9 +16,12 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -42,6 +45,12 @@ public class LauncherSubsystem extends SubsystemBase {
     private final SparkMax turretFeedMotor = new SparkMax(CanIdConstants.kTurretFeedCanId, MotorType.kBrushless);
     public final double kTurretFeedDuty = 0.5;
     public final double kMinRpsToRunTurretFeed = 40;
+
+    // red bars inside the robot
+    private final SparkMax hopperMotor = new SparkMax(CanIdConstants.kHopperCanId, MotorType.kBrushless);
+    public final double kHopperDuty = 0.5;
+
+    public final AngularVelocity kManualLaunchVelocity = RotationsPerSecond.of(55);
 
     VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
@@ -74,9 +83,16 @@ public class LauncherSubsystem extends SubsystemBase {
     public NTDouble targetRps = new NTDouble(10, "launcher/targetRPS");
     public NTDouble targetDistance = new NTDouble(0, "launcher/distance");
 
-    // public LauncherSubsystem(PhotonCameraSubsystem photon) {
     public LauncherSubsystem() {
-        // this.photon = photon;
+        turretFeedMotor.configure(
+                new SparkMaxConfig().smartCurrentLimit(20),
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
+
+        hopperMotor.configure(
+                new SparkMaxConfig().smartCurrentLimit(20).inverted(true),
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
 
         // set left motor to clockwise leader and right motor to opposed follower (should rotate ccw)
         // set both motors to coast mode as well
@@ -172,11 +188,22 @@ public class LauncherSubsystem extends SubsystemBase {
     }
 
     public void runFeedIfReady() {
+        double hopperDuty = 0;
         double turretFeedDuty = 0;
         if (leftMotor.getVelocity().getValueAsDouble() > kMinRpsToRunTurretFeed) {
             turretFeedDuty = kTurretFeedDuty;
+            hopperDuty = kHopperDuty;
         }
+        hopperMotor.set(hopperDuty);
         turretFeedMotor.set(turretFeedDuty);
+    }
+
+    public Command shootManually() {
+        return run(() -> {
+                    shootVelocity(kManualLaunchVelocity);
+                    runFeedIfReady();
+                })
+                .finallyDo(() -> turnOff());
     }
 
     public void shootVelocity(AngularVelocity speed) {
@@ -190,6 +217,7 @@ public class LauncherSubsystem extends SubsystemBase {
 
     public void turnOff() {
         leftMotor.set(0);
+        hopperMotor.set(0);
         turretFeedMotor.set(0);
     }
 
@@ -201,15 +229,6 @@ public class LauncherSubsystem extends SubsystemBase {
         // double[] distances = {63,89,140,168,188,203,227};
         // double[] rpsValues = {45,47,59,64,67,73,78.5};
 
-        // To Do: make ranges for each of the distance values
-        /*
-        for(int i =0; i<distances.length; i++){
-            if(distance == distances[i]){
-                launcherRps = rpsValues[i];
-                return launcherRps;
-            }
-        }*/
-
         // launcherRps = -2.0e-06 * Math.pow(distance, 3) + 0.0014 * Math.pow(distance, 2) - 0.003 * distance + 37.202;
         double a = -1.29e-06;
         double b = 9.63e-04;
@@ -220,26 +239,14 @@ public class LauncherSubsystem extends SubsystemBase {
         return RotationsPerSecond.of(launcherRps);
     }
 
-    /*public Command shootPhotonCommand() {
-        return run(() -> shootPhoton())
-            .finallyDo(() -> setMotorDuty(0));
-    }*/
-
-    /*public void shootPhoton() {
-        double distance = targetDistance.get();
-        rps = launcherRpsForDistance(Distance.ofBaseUnits(distance, distance);
-        Logger.recordOutput("flywheel/speedRPS", rps);
-    }*/
-
     @Override
     public void periodic() {
-        // shootPhoton();
         // This method will be called once per scheduler run
-        Logger.recordOutput(leftMotorRpsEntry, leftMotor.getVelocity().getValueAsDouble());
-        Logger.recordOutput(rightMotorRpsEntry, rightMotor.getVelocity().getValueAsDouble());
-        Logger.recordOutput(leftMotorPositionEntry, leftMotor.getPosition().getValueAsDouble());
-        Logger.recordOutput(rightMotorPositionEntry, rightMotor.getPosition().getValueAsDouble());
-        Logger.recordOutput(leftMotorVoltageEntry, leftMotor.getMotorVoltage().getValueAsDouble());
-        Logger.recordOutput(rightMotorVoltageEntry, rightMotor.getMotorVoltage().getValueAsDouble());
+        Logger.recordOutput("Launcher/LauncherPRS", leftMotor.getVelocity().getValueAsDouble());
+        Logger.recordOutput(
+                "Launcher/TurretFeedRPM", turretFeedMotor.getEncoder().getVelocity());
+        Logger.recordOutput("Launcher/HopperRPM", hopperMotor.getEncoder().getVelocity());
+        Logger.recordOutput("Launcher/TurretFeedDuty", turretFeedMotor.getAppliedOutput());
+        Logger.recordOutput("Launcher/HopperDuty", hopperMotor.getAppliedOutput());
     }
 }

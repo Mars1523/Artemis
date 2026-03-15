@@ -17,9 +17,6 @@ public class FuelInputSubsystem extends SubsystemBase {
     // small green bars outside the robot
     private final SparkMax intakeMotor = new SparkMax(CanIdConstants.kIntakeCanId, MotorType.kBrushless);
 
-    // red bars inside the robot
-    private final SparkMax hopperMotor = new SparkMax(CanIdConstants.kHopperCanId, MotorType.kBrushless);
-
     private final SparkMax intakeArm = new SparkMax(CanIdConstants.kIntakeArmCanId, MotorType.kBrushless);
 
     public double intakeArmUpPosition = 0;
@@ -35,11 +32,6 @@ public class FuelInputSubsystem extends SubsystemBase {
 
     public FuelInputSubsystem() {
         intakeMotor.configure(
-                new SparkMaxConfig().smartCurrentLimit(20).inverted(true),
-                ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters);
-
-        hopperMotor.configure(
                 new SparkMaxConfig().smartCurrentLimit(20).inverted(true),
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
@@ -61,11 +53,9 @@ public class FuelInputSubsystem extends SubsystemBase {
     public Command runIntake() {
         return Commands.run(() -> {
                     intakeMotor.set(intakeMotorSpeed.get());
-                    hopperMotor.set(hopperMotorSpeed.get());
                 })
                 .finallyDo(() -> {
                     intakeMotor.set(0);
-                    hopperMotor.set(0);
                 });
     }
 
@@ -73,11 +63,9 @@ public class FuelInputSubsystem extends SubsystemBase {
     public Command runIntakeReverse() {
         return Commands.run(() -> {
                     intakeMotor.set(intakeMotorReverseSpeed.get());
-                    hopperMotor.set(hopperMotorReverseSpeed.get());
                 })
                 .finallyDo(() -> {
                     intakeMotor.set(0);
-                    hopperMotor.set(0);
                 });
     }
 

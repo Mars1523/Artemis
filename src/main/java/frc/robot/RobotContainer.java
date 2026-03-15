@@ -66,7 +66,8 @@ public class RobotContainer {
     private void configureBindings() {
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
         commandXboxController.a().whileTrue(fuelInputSubsystem.runIntake());
-        commandXboxController.x().whileTrue(aimingSub.shootPhotonCommand());
+        commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
+        commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
         commandXboxController.rightBumper().onTrue(fuelInputSubsystem.intakeUp());
         commandXboxController.leftBumper().onTrue(fuelInputSubsystem.intakeDown());
 
