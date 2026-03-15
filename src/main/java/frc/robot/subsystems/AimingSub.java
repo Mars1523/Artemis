@@ -55,14 +55,11 @@ public class AimingSub extends SubsystemBase {
         return turretSubsystem.getTurretAngle();
     }
 
-    public Command pointTurretPhotonCommand() {
-        return run(() -> {
-            turretSubsystem.setTurretAngle(this.turretAnglePhoton);
-        });
-    }
-
     public Command shootPhotonCommand() {
-        return run(() -> launcherSubsystem.shootDistance(robotToHubDistancePhoton))
+        return run(() -> {
+                    launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
+                    turretSubsystem.setTurretAngle(this.turretAnglePhoton);
+                })
                 .finallyDo(() -> launcherSubsystem.setMotorDuty(0));
     }
 

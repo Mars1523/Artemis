@@ -103,6 +103,15 @@ public class TurretSubsystem extends SubsystemBase {
         return run(() -> shootAtHub());
     }
 
+    private final double manualRotationFactor = 0.01;
+
+    public void rotateTurret(double input) {
+        double currAngleRotations = getTurretAngle().getRotations();
+        double newAngleRotations = currAngleRotations + input * manualRotationFactor;
+        Rotation2d newAngle = new Rotation2d(Rotations.of(newAngleRotations));
+        setTurretAngle(newAngle);
+    }
+
     public Command setTurretAngleCommand(Rotation2d angle) {
         return run(() -> setTurretAngle(angle));
     }
