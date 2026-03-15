@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -12,15 +13,19 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CanIdConstants;
 import frc.robot.NTDouble;
+import org.littletonrobotics.junction.Logger;
 
 public class FuelInputSubsystem extends SubsystemBase {
+    // absolute all the way up = 0.713
+    // absolute all the way down = 0.4605
+    // use diff of 0.002
+    public final double kIntakeArmAbsoluteUpSetpoint = 0.711;
+    public final double kIntakeArmAbsoluteDownSetpoint = 0.4625;
+
     // small green bars outside the robot
     private final SparkMax intakeMotor = new SparkMax(CanIdConstants.kIntakeCanId, MotorType.kBrushless);
 
     private final SparkMax intakeArm = new SparkMax(CanIdConstants.kIntakeArmCanId, MotorType.kBrushless);
-
-    public double intakeArmUpPosition = 0;
-    public double intakeArmDownPosition = -10;
 
     SparkClosedLoopController armController = intakeArm.getClosedLoopController();
 
@@ -30,24 +35,38 @@ public class FuelInputSubsystem extends SubsystemBase {
     NTDouble intakeMotorReverseSpeed = new NTDouble(-0.5, "intakeMotorReverseSpeed");
     NTDouble hopperMotorReverseSpeed = new NTDouble(-0.5, "hopperMotorReverseSpeed");
 
+    SparkMaxConfig intakeArmConfig;
+    NTDouble intakeArmP = new NTDouble(0.001, "intakeArmP");
+
     public FuelInputSubsystem() {
         intakeMotor.configure(
                 new SparkMaxConfig().smartCurrentLimit(20).inverted(true),
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
-        var intakeArmConfig = new SparkMaxConfig();
+        intakeArmConfig = new SparkMaxConfig();
         intakeArmConfig.smartCurrentLimit(20);
 
+        /*
         intakeArmConfig
                 .softLimit
                 .forwardSoftLimitEnabled(true)
                 .reverseSoftLimitEnabled(true)
                 .forwardSoftLimit(0)
-                .reverseSoftLimit(-10);
+                .reverseSoftLimit(-10);*/
 
-        intakeArmConfig.closedLoop.outputRange(-0.2, 0.2).pid(0.07, 0, 0);
+        intakeArmConfig.absoluteEncoder.inverted(true);
+        intakeArmConfig
+                .closedLoop
+                .outputRange(-0.2, 0.2)
+                .pid(intakeArmP.get(), 0, 0)
+                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         intakeArm.configure(intakeArmConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        intakeArmP.subscribe((newP) -> {
+            intakeArmConfig.closedLoop.p(newP);
+            intakeArm.configure(intakeArmConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        });
     }
 
     public Command runIntake() {
@@ -69,22 +88,34 @@ public class FuelInputSubsystem extends SubsystemBase {
                 });
     }
 
+    /*
     public boolean isIntakeDown() {
         if (armController.getSetpoint() == intakeArmDownPosition) {
             return true;
         }
         return false;
-    }
+    }*/
 
     public Command intakeDown() {
         return Commands.runOnce(() -> {
-            armController.setSetpoint(intakeArmDownPosition, ControlType.kPosition);
+            armController.setSetpoint(kIntakeArmAbsoluteDownSetpoint, ControlType.kPosition);
         });
     }
 
     public Command intakeUp() {
         return Commands.runOnce(() -> {
-            armController.setSetpoint(intakeArmUpPosition, ControlType.kPosition);
+            armController.setSetpoint(kIntakeArmAbsoluteUpSetpoint, ControlType.kPosition);
         });
+    }
+
+    @Override
+    public void periodic() {
+        Logger.recordOutput("FuelInput/IntakeArmSetpoint", armController.getSetpoint());
+        Logger.recordOutput(
+                "FuelInput/IntakeArmAbsoluteEncoderPosition",
+                intakeArm.getAbsoluteEncoder().getPosition());
+        Logger.recordOutput(
+                "FuelInput/IntakeArmEncoderPosition", intakeArm.getEncoder().getPosition());
+        Logger.recordOutput("FuelInput/IntakeArmDuty", intakeArm.getAppliedOutput());
     }
 }

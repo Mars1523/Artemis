@@ -64,12 +64,16 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        // todo: add climb
+        // map primaryJoy 8 to climb up
+        // map primaryJoy 7 to climb down
+
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
         commandXboxController.a().whileTrue(fuelInputSubsystem.runIntake());
         commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
         commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
-        commandXboxController.rightBumper().onTrue(fuelInputSubsystem.intakeUp());
-        commandXboxController.leftBumper().onTrue(fuelInputSubsystem.intakeDown());
+        commandXboxController.povUp().onTrue(fuelInputSubsystem.intakeUp());
+        commandXboxController.povDown().onTrue(fuelInputSubsystem.intakeDown());
 
         Command rotateTurretCommand = Commands.run(
                 () -> {
