@@ -16,11 +16,8 @@ import frc.robot.NTDouble;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeSubsystem extends SubsystemBase {
-    // absolute all the way up = 0.867
-    // absolute all the way down = 0.11
-    // use diff of 0.002
-    public final double kIntakeArmAbsoluteUpSetpoint = 0.85;
-    public final double kIntakeArmAbsoluteDownSetpoint = 0.13;
+    public final double kIntakeArmAbsoluteUpSetpoint = 0.635;
+    public final double kIntakeArmAbsoluteDownSetpoint = 0.390;
 
     // small green bars outside the robot
     private final SparkMax intakeMotor = new SparkMax(CanIdConstants.kIntakeCanId, MotorType.kBrushless);
@@ -55,10 +52,10 @@ public class IntakeSubsystem extends SubsystemBase {
                 .forwardSoftLimit(0)
                 .reverseSoftLimit(-10);*/
 
-        intakeArmConfig.absoluteEncoder.inverted(true);
+        intakeArmConfig.absoluteEncoder.inverted(false);
         intakeArmConfig
                 .closedLoop
-                .outputRange(-0.2, 0.2)
+                .outputRange(-0.2, 0.5)
                 .pid(intakeArmP.get(), 0, 0)
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         intakeArm.configure(intakeArmConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
