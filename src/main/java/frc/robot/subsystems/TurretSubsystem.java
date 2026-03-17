@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -27,8 +28,12 @@ public class TurretSubsystem extends SubsystemBase {
     private SwerveDriveSubsystem swerve;
     private SparkMax turretMotor = new SparkMax(CanIdConstants.kTurretRotateCanId, MotorType.kBrushless);
     SparkClosedLoopController turretController;
-    private static final double minAngle = -0.25;
-    private static final double maxAngle = 0.25;
+
+    // absolute min is -0.302
+    // absolute max is 0.793
+    // go from -0.28 to 0.72?
+    private static final double kMinAngle = -0.28;
+    private static final double kMaxAngle = 0.72;
 
     SparkMaxConfig turretConfig = new SparkMaxConfig();
     // for PID constants finding
@@ -49,12 +54,13 @@ public class TurretSubsystem extends SubsystemBase {
         turretConfig.closedLoop.feedForward.kS(0.17).kV(.127);
         turretConfig.closedLoop.maxMotion.cruiseVelocity(10).maxAcceleration(10);
         turretConfig.smartCurrentLimit(20, 20);
+        turretConfig.apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoderV2);
         turretConfig
                 .softLimit
                 .forwardSoftLimitEnabled(true)
                 .reverseSoftLimitEnabled(true)
-                .forwardSoftLimit(0.675)
-                .reverseSoftLimit(-0.325);
+                .forwardSoftLimit(kMaxAngle)
+                .reverseSoftLimit(kMinAngle);
         turretConfig.closedLoop.outputRange(-0.8, 0.8).pid(10, 0, 0).feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
         turretController = turretMotor.getClosedLoopController();
@@ -119,10 +125,10 @@ public class TurretSubsystem extends SubsystemBase {
     public void setTurretAngle(Rotation2d angle) {
         Logger.recordOutput("Turret/SetTurretAngle", angle.getDegrees());
         double turretsetpoint = angle.getRotations();
-        if (turretsetpoint > 0.675) {
+        if (turretsetpoint > kMaxAngle) {
             turretsetpoint -= 1;
         }
-        if (turretsetpoint < -0.375) {
+        if (turretsetpoint < kMinAngle) {
             turretsetpoint += 1;
         }
         Logger.recordOutput("Turret/setpoint", turretsetpoint);

@@ -16,11 +16,11 @@ import frc.robot.NTDouble;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeSubsystem extends SubsystemBase {
-    // absolute all the way up = 0.713
-    // absolute all the way down = 0.4605
+    // absolute all the way up = 0.867
+    // absolute all the way down = 0.11
     // use diff of 0.002
-    public final double kIntakeArmAbsoluteUpSetpoint = 0.711;
-    public final double kIntakeArmAbsoluteDownSetpoint = 0.4625;
+    public final double kIntakeArmAbsoluteUpSetpoint = 0.85;
+    public final double kIntakeArmAbsoluteDownSetpoint = 0.13;
 
     // small green bars outside the robot
     private final SparkMax intakeMotor = new SparkMax(CanIdConstants.kIntakeCanId, MotorType.kBrushless);
