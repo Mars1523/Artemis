@@ -45,7 +45,6 @@ public class PhotonCameraSubsystem extends SubsystemBase {
 
     private final double maxPoseAmbiguity = 0.2;
     private final double maxYawRate = 3.5;
-    private final double resultAge = 0.25;
 
     private final double worstcaseFPS = 27;
     private Matrix<N3, N1> curStdDevs = kSingleTagStdDevs;
@@ -58,8 +57,8 @@ public class PhotonCameraSubsystem extends SubsystemBase {
         this.estConsumer = estConsumer;
         this.yawRateRadPerSec = yawRateRadPerSec;
 
-        cams.add(new Cam("leftCamera", new PhotonPoseEstimator(kTagLayout, kRobotToCamera1)));
-        cams.add(new Cam("rightCamera", new PhotonPoseEstimator(kTagLayout, kRobotToCamera2)));
+        cams.add(new Cam("leftCamera", new PhotonPoseEstimator(kTagLayout, kRobotToCameraLeft)));
+        cams.add(new Cam("rightCamera", new PhotonPoseEstimator(kTagLayout, kRobotToCameraRight)));
         // Replace Camera with whatever name you want. Theoretically you could also add more cameras
     }
 
@@ -67,7 +66,6 @@ public class PhotonCameraSubsystem extends SubsystemBase {
     public void periodic() {
 
         if (Math.abs(yawRateRadPerSec.getAsDouble()) > maxYawRate) {
-            System.out.println("WEEEEEEEEEE");
             return;
         }
 

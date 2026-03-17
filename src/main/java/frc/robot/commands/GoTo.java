@@ -39,7 +39,6 @@ public class GoTo {
     }
 
     public static Alliance getAlliance() {
-        System.out.println("returning alliance: " + DriverStation.getAlliance());
         return DriverStation.getAlliance().orElse(Alliance.Blue);
     }
 

@@ -21,9 +21,17 @@ public class AimingSub extends SubsystemBase {
     private SwerveDriveSubsystem swerveDriveSubsystem;
     private TurretSubsystem turretSubsystem;
     private LauncherSubsystem launcherSubsystem;
+    private Translation2d hubPosition;
+    private Translation2d upHomePos;
+    private Translation2d downHomePos;
 
     private Translation2d blueHub = new Translation2d(4.621, 4.016);
     private Translation2d redHub = new Translation2d(11.945, 3.990);
+
+    private Translation2d UphomeR = new Translation2d(11.4, 5.5);
+    private Translation2d DownhomeR = new Translation2d(11.4, 2.5);
+    private Translation2d UphomeB = new Translation2d(4, 5.5);
+    private Translation2d DownhomeB = new Translation2d(4, 2.5);
 
     public Distance robotToHubDistancePhoton;
     public Rotation2d turretAnglePhoton;
@@ -35,6 +43,22 @@ public class AimingSub extends SubsystemBase {
         this.swerveDriveSubsystem = swerveDriveSubsystem;
         this.turretSubsystem = turretSubsystem;
         this.launcherSubsystem = launcherSubsystem;
+
+        /// BAD!!
+        final Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
+
+        // if(alliance == Alliance.Red){
+        //     upHomePos = UphomeR;
+        //     downHomePos = DownhomeR;
+        //     hubPosition = redHub;
+        // }
+        // else{
+        //     upHomePos = UphomeB;
+        //     downHomePos = DownhomeB;
+        //     hubPosition = blueHub;
+        // }
+        /// BAD
+          
     }
 
     public Time getTime(Distance distance) {
@@ -64,16 +88,36 @@ public class AimingSub extends SubsystemBase {
                 .finallyDo(() -> launcherSubsystem.turnOff());
     }
 
+    public Translation2d getHubPos(){
+        Translation2d hubPos = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? redHub : blueHub;
+        return hubPos;
+    }
+
+    public Translation2d getUpHomePos(){
+        Translation2d upHomePos = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? UphomeR : UphomeB;
+        return upHomePos;
+    }
+
+    public Translation2d getDownHomePos(){
+        Translation2d downHomePos = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? DownhomeR : DownhomeB;
+        return downHomePos;
+    }
+
     @Override
     public void periodic() {
-        Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
-        Translation2d hubPosition = alliance == Alliance.Red ? redHub : blueHub;
-
+        Translation2d targetPosition;
         Rotation2d robotPoseAngle = swerveDriveSubsystem.getPose().getRotation();
         var robotFieldPosition =
                 swerveDriveSubsystem.getPose().getTranslation().plus(centerOffset.rotateBy(robotPoseAngle));
 
-        Translation2d robotToHub = hubPosition.minus(robotFieldPosition);
+        if (robotFieldPosition.getX() < 4.63 || robotFieldPosition.getX() > 11.91){
+            targetPosition = getHubPos();
+        }
+        else{
+            targetPosition = robotFieldPosition.getY() > 4.03 ? getUpHomePos() : getDownHomePos();
+        }
+
+        Translation2d robotToHub = targetPosition.minus(robotFieldPosition);
         double xV = swerveDriveSubsystem.getChassisSpeeds().vxMetersPerSecond;
         double yV = swerveDriveSubsystem.getChassisSpeeds().vyMetersPerSecond;
         Distance hubDistance = Meters.of(robotToHub.getNorm());
@@ -81,7 +125,7 @@ public class AimingSub extends SubsystemBase {
 
         for (int i = 0; i < 4; i++) {
             Translation2d compensation = new Translation2d(xV * time.abs(Seconds), yV * time.abs(Seconds));
-            robotToHub = hubPosition.minus(robotFieldPosition).minus(compensation);
+            robotToHub = targetPosition.minus(robotFieldPosition).minus(compensation);
             hubDistance = Meters.of(robotToHub.getNorm());
             time = getTime(hubDistance);
         }

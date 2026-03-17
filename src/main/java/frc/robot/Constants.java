@@ -78,12 +78,12 @@ public final class Constants {
         // To add additional cameras or change the Camera names, simply add aditional cameras.
         // I think its safe to remove all but one camera... I think...
 
-        public static final Transform3d kRobotToCamera1 = new Transform3d(
-                new Translation3d(-.2159, 0.2794, 0.2667),
-                new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(180 - 45)));
-        public static final Transform3d kRobotToCamera2 = new Transform3d(
-                new Translation3d(.0127, -.3048, .2921),
-                new Rotation3d(0, Units.degreesToRadians(5), Units.degreesToRadians(180 + 20)));
+        public static final Transform3d kRobotToCameraRight = new Transform3d(
+                new Translation3d(0.127, 0.3302, 0.254),
+                new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(-90)));
+        public static final Transform3d kRobotToCameraLeft = new Transform3d(
+                new Translation3d(-0.2286, -0.2413, 0.2413),
+                new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(135)));
 
         public static final double maxPoseAmbiguity = 0.2;
         public static final double maxYawRate = Units.degreesToRadians(200);

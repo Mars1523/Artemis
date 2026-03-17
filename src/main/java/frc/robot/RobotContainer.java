@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.AutoRotate;
 import frc.robot.subsystems.AimingSub;
-import frc.robot.subsystems.FuelInputSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.PhotonCameraSubsystem;
 import frc.robot.subsystems.SwerveDriveSubsystem;
@@ -33,7 +33,7 @@ public class RobotContainer {
 
     SendableChooser<Command> autoChooser = AutoBuilder.buildAutoChooser();
 
-    FuelInputSubsystem fuelInputSubsystem = new FuelInputSubsystem();
+    IntakeSubsystem IntakeSubsystem = new IntakeSubsystem();
     LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
     TurretSubsystem turretSubsystem = new TurretSubsystem(swerveDriveSubsystem);
     // AimingSub aimSub = new AimingSub(swerveDriveSubsystem, turretSubsystem,
@@ -48,10 +48,10 @@ public class RobotContainer {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
 
         NamedCommands.registerCommand("shootVelocityCommand", launcherSubsystem.shootVelocityCommand());
-        NamedCommands.registerCommand("intakeUp", fuelInputSubsystem.intakeUp());
-        NamedCommands.registerCommand("intakeDown", fuelInputSubsystem.intakeDown());
-        NamedCommands.registerCommand("runIntake", fuelInputSubsystem.runIntake());
-        NamedCommands.registerCommand("runIntakeReverse", fuelInputSubsystem.runIntakeReverse());
+        NamedCommands.registerCommand("intakeUp", IntakeSubsystem.intakeUp());
+        NamedCommands.registerCommand("intakeDown", IntakeSubsystem.intakeDown());
+        NamedCommands.registerCommand("runIntake", IntakeSubsystem.runIntake());
+        NamedCommands.registerCommand("runIntakeReverse", IntakeSubsystem.runIntakeReverse());
         NamedCommands.registerCommand("shootAtHomeCommand", turretSubsystem.shootAtHomeCommand());
         NamedCommands.registerCommand("shootAtHubCommand", turretSubsystem.shootAtHubCommand());
         configureAutos();
@@ -69,11 +69,11 @@ public class RobotContainer {
         // map primaryJoy 7 to climb down
 
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
-        commandXboxController.a().whileTrue(fuelInputSubsystem.runIntake());
+        commandXboxController.a().whileTrue(IntakeSubsystem.runIntake());
         commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
         commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
-        commandXboxController.povUp().onTrue(fuelInputSubsystem.intakeUp());
-        commandXboxController.povDown().onTrue(fuelInputSubsystem.intakeDown());
+        commandXboxController.povUp().onTrue(IntakeSubsystem.intakeUp());
+        commandXboxController.povDown().onTrue(IntakeSubsystem.intakeDown());
 
         Command rotateTurretCommand = Commands.run(
                 () -> {
