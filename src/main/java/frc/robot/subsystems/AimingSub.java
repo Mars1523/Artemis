@@ -58,7 +58,7 @@ public class AimingSub extends SubsystemBase {
         //     hubPosition = blueHub;
         // }
         /// BAD
-          
+
     }
 
     public Time getTime(Distance distance) {
@@ -88,18 +88,19 @@ public class AimingSub extends SubsystemBase {
                 .finallyDo(() -> launcherSubsystem.turnOff());
     }
 
-    public Translation2d getHubPos(){
+    public Translation2d getHubPos() {
         Translation2d hubPos = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? redHub : blueHub;
         return hubPos;
     }
 
-    public Translation2d getUpHomePos(){
+    public Translation2d getUpHomePos() {
         Translation2d upHomePos = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? UphomeR : UphomeB;
         return upHomePos;
     }
 
-    public Translation2d getDownHomePos(){
-        Translation2d downHomePos = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? DownhomeR : DownhomeB;
+    public Translation2d getDownHomePos() {
+        Translation2d downHomePos =
+                DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? DownhomeR : DownhomeB;
         return downHomePos;
     }
 
@@ -110,10 +111,9 @@ public class AimingSub extends SubsystemBase {
         var robotFieldPosition =
                 swerveDriveSubsystem.getPose().getTranslation().plus(centerOffset.rotateBy(robotPoseAngle));
 
-        if (robotFieldPosition.getX() < 4.63 || robotFieldPosition.getX() > 11.91){
+        if (robotFieldPosition.getX() < 4.63 || robotFieldPosition.getX() > 11.91) {
             targetPosition = getHubPos();
-        }
-        else{
+        } else {
             targetPosition = robotFieldPosition.getY() > 4.03 ? getUpHomePos() : getDownHomePos();
         }
 
