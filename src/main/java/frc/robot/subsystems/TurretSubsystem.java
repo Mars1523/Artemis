@@ -112,14 +112,14 @@ public class TurretSubsystem extends SubsystemBase {
     private final double manualRotationFactor = 0.01;
 
     public void rotateTurret(double input) {
-        double currAngleRotations = getTurretAngle().getRotations();
+        double currAngleRotations = getTurretSetpoint().getRotations();
         double newAngleRotations = currAngleRotations + input * manualRotationFactor;
         Rotation2d newAngle = new Rotation2d(Rotations.of(newAngleRotations));
         setTurretAngle(newAngle);
     }
 
     public Command setTurretAngleCommand(Rotation2d angle) {
-        return run(() -> setTurretAngle(angle));
+        return runOnce(() -> setTurretAngle(angle));
     }
 
     public void setTurretAngle(Rotation2d angle) {
@@ -135,9 +135,13 @@ public class TurretSubsystem extends SubsystemBase {
         turretController.setSetpoint(turretsetpoint, ControlType.kPosition);
     }
 
-    public Rotation2d getTurretAngle() {
+    public Rotation2d getTurretSetpoint() {
         double currentSetpoint = turretController.getSetpoint();
         return new Rotation2d(Rotations.of(currentSetpoint));
+    }
+
+    public Rotation2d getTurretAngle() {
+        return new Rotation2d(turretMotor.getAbsoluteEncoder().getPosition());
     }
 
     public void shootAtHub() {
@@ -211,6 +215,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        Logger.recordOutput("Turret/TurretAngleRotations", getTurretAngle().getRotations());
         /*
         i = i.plus(Rotation2d.fromDegrees(1));
         setTurretSetpoint(i);

@@ -76,7 +76,7 @@ public class AimingSub extends SubsystemBase {
     }
 
     public Rotation2d getAngle() {
-        return turretSubsystem.getTurretAngle();
+        return turretSubsystem.getTurretSetpoint();
     }
 
     public Command shootPhotonCommand() {
