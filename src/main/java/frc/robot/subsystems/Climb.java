@@ -19,8 +19,8 @@ public class Climb extends SubsystemBase {
     int downSetpoint = 0;
 
     SwerveDriveSubsystem swerve;
-    private final SparkMax climb1 = new SparkMax(1, MotorType.kBrushless);
-    private final SparkMax climb2 = new SparkMax(2, MotorType.kBrushless);
+    private final SparkMax climb1 = new SparkMax(61, MotorType.kBrushless);
+    private final SparkMax climb2 = new SparkMax(62, MotorType.kBrushless);
     private SparkClosedLoopController climbController;
     /** Creates a new Climb. */
     public Climb(SwerveDriveSubsystem swerve) {
