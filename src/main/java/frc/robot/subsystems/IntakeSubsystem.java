@@ -17,7 +17,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class IntakeSubsystem extends SubsystemBase {
     public final double kIntakeArmAbsoluteUpSetpoint = 0.635;
-    public final double kIntakeArmAbsoluteDownSetpoint = 0.390;
+    public final double kIntakeArmAbsoluteDownSetpoint = 0.370;
 
     // small green bars outside the robot
     private final SparkMax intakeMotor = new SparkMax(CanIdConstants.kIntakeCanId, MotorType.kBrushless);
@@ -26,14 +26,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
     SparkClosedLoopController armController = intakeArm.getClosedLoopController();
 
-    NTDouble intakeMotorSpeed = new NTDouble(0.5, "intakeMotorSpeed");
+    NTDouble intakeMotorSpeed = new NTDouble(0.85, "intakeMotorSpeed");
     NTDouble hopperMotorSpeed = new NTDouble(0.5, "hopperMotorSpeed");
 
     NTDouble intakeMotorReverseSpeed = new NTDouble(-0.5, "intakeMotorReverseSpeed");
     NTDouble hopperMotorReverseSpeed = new NTDouble(-0.5, "hopperMotorReverseSpeed");
 
     SparkMaxConfig intakeArmConfig;
-    NTDouble intakeArmP = new NTDouble(0.001, "intakeArmP");
+    NTDouble intakeArmP = new NTDouble(2.8, "intakeArmP");
 
     public IntakeSubsystem() {
         intakeMotor.configure(
