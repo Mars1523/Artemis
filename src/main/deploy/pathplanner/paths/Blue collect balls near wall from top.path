@@ -8,7 +8,7 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.2605692342495227,
+        "x": 3.2605692342495223,
         "y": 7.371922933839909
       },
       "isLocked": false,
@@ -124,7 +124,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Blue alliance",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

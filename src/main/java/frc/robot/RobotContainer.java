@@ -14,8 +14,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
-import frc.robot.commands.autos.AutoRotate;
 import frc.robot.subsystems.AimingSub;
+import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.PhotonCameraSubsystem;
@@ -37,6 +37,7 @@ public class RobotContainer {
     IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
     TurretSubsystem turretSubsystem = new TurretSubsystem(swerveDriveSubsystem);
+    Climb climbSubsystem = new Climb();
     // AimingSub aimSub = new AimingSub(swerveDriveSubsystem, turretSubsystem,
     // launcherSubsystem);
     PhotonCameraSubsystem photonCameraSubsystem = new PhotonCameraSubsystem(
@@ -53,23 +54,25 @@ public class RobotContainer {
         NamedCommands.registerCommand("intakeDown", intakeSubsystem.intakeDown());
         NamedCommands.registerCommand("runIntake", intakeSubsystem.runIntake());
         NamedCommands.registerCommand("runIntakeReverse", intakeSubsystem.runIntakeReverse());
-        NamedCommands.registerCommand("shootAtHomeCommand", turretSubsystem.shootAtHomeCommand());
-        NamedCommands.registerCommand("shootAtHubCommand", turretSubsystem.shootAtHubCommand());
+        NamedCommands.registerCommand("shootAtHomeCommand", aimingSub.shootPhotonCommand());
+        NamedCommands.registerCommand("shootAtHubCommand", aimingSub.shootPhotonCommand());
         configureAutos();
         configureBindings();
     }
 
     private void configureAutos() {
-        autoChooser.addOption("Rotate", new AutoRotate(swerveDriveSubsystem, 45, 0.1));
         Shuffleboard.getTab("auto").add(autoChooser);
     }
 
     private void configureBindings() {
-        // todo: add climb
+        // todo: add climb (statud: done)
         // map primaryJoy 8 to climb up
         // map primaryJoy 7 to climb down
 
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
+        primaryJoy.button(8).whileTrue(climbSubsystem.armUpCommand());
+        primaryJoy.button(7).whileTrue(climbSubsystem.armDownCommand());
+
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
         commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
         commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
@@ -79,7 +82,8 @@ public class RobotContainer {
                 .povUp()
                 .onTrue(Commands.sequence(
                         turretSubsystem.setTurretAngleCommand(new Rotation2d(0)),
-                        Commands.waitUntil(() -> Math.abs(turretSubsystem.getTurretAngle().getRotations()) < 0.02),
+                        Commands.waitUntil(
+                                () -> Math.abs(turretSubsystem.getTurretAngle().getRotations()) < 0.02),
                         intakeSubsystem.intakeUp()));
 
         commandXboxController.povDown().onTrue(intakeSubsystem.intakeDown());
@@ -96,6 +100,10 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        var command = autoChooser.getSelected();
+        if (command == null) {
+            return Commands.none();
+        }
+        return command;
     }
 }

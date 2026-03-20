@@ -23,7 +23,7 @@ public class GoTo {
     private static final int redReefSWTagID = 6;
     private static final int redCsLeftTagID = 1;
     private static final int redCsRightTagID = 2;
-    private static final int redProcessorTagID = 3;
+    private static final int blueClimbTagID = 31;
     private static final int blueReefNTagID = 21;
     private static final int blueReefNETagID = 22;
     private static final int blueReefNWTagID = 20;
@@ -32,7 +32,7 @@ public class GoTo {
     private static final int blueReefSWTagID = 19;
     private static final int blueCsLeftTagID = 13;
     private static final int blueCsRightTagID = 12;
-    private static final int blueProcessorTagID = 16;
+    private static final int redClimbTagID = 15;
 
     public static boolean isRed() {
         return getAlliance() == Alliance.Red;
@@ -52,12 +52,12 @@ public class GoTo {
         return infrontOfTag;
     }
 
-    public static Command processor() {
+    public static Command climbLineUp() {
         return Commands.either(
-                AutoBuilder.pathfindToPose(inFrontOfTag(redProcessorTagID), constraints)
-                        .alongWith(Commands.print("going to tag ID " + redProcessorTagID)),
-                AutoBuilder.pathfindToPose(inFrontOfTag(blueProcessorTagID), constraints)
-                        .alongWith(Commands.print("going to tag ID " + blueProcessorTagID)),
+                AutoBuilder.pathfindToPose(inFrontOfTag(redClimbTagID), constraints)
+                        .alongWith(Commands.print("going to tag ID " + redClimbTagID)),
+                AutoBuilder.pathfindToPose(inFrontOfTag(blueClimbTagID), constraints)
+                        .alongWith(Commands.print("going to tag ID " + blueClimbTagID)),
                 GoTo::isRed);
     }
 }

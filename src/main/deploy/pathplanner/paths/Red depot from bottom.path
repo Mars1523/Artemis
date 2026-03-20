@@ -41,7 +41,7 @@
       },
       "nextControl": {
         "x": 14.818789463827054,
-        "y": 3.2742930623929793
+        "y": 3.274293062392979
       },
       "isLocked": false,
       "linkedName": null
@@ -109,7 +109,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Red alliance",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

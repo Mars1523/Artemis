@@ -93,7 +93,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Blue alliance",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

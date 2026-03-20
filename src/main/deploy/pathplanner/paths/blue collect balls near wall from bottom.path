@@ -24,8 +24,8 @@
         "y": 0.4095237585616428
       },
       "nextControl": {
-        "x": 0.7907366919470046,
-        "y": 0.591847168369702
+        "x": 0.7907366919470037,
+        "y": 0.5918471683697022
       },
       "isLocked": false,
       "linkedName": null
@@ -52,7 +52,7 @@
         "y": 7.138131019905821
       },
       "prevControl": {
-        "x": 0.2161604975948834,
+        "x": 0.21616049759488334,
         "y": 6.6295970951319845
       },
       "nextControl": {
@@ -140,7 +140,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Blue alliance",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

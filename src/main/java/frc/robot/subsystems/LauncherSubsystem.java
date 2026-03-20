@@ -234,7 +234,8 @@ public class LauncherSubsystem extends SubsystemBase {
         double a = -1.29e-06;
         double b = 9.63e-04;
         double c = 1.72e-02;
-        double d = 3.99e01;
+        // double d = 3.99e01;
+        double d = 3.99e01 + 2.5;
         double distanceInches = distance.abs(Inches);
         double launcherRps = a * Math.pow(distanceInches, 3) + b * Math.pow(distanceInches, 2) + c * distanceInches + d;
         return RotationsPerSecond.of(launcherRps);
@@ -243,7 +244,7 @@ public class LauncherSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        Logger.recordOutput("Launcher/LauncherPRS", leftMotor.getVelocity().getValueAsDouble());
+        Logger.recordOutput("Launcher/LauncherRPS", leftMotor.getVelocity().getValueAsDouble());
         Logger.recordOutput(
                 "Launcher/TurretFeedRPM", turretFeedMotor.getEncoder().getVelocity());
         Logger.recordOutput("Launcher/HopperRPM", hopperMotor.getEncoder().getVelocity());

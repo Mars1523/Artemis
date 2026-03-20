@@ -28,19 +28,19 @@ public class Robot extends LoggedRobot {
      */
     public Robot() {
         // adds advantagekit data to network tables
-        Logger.addDataReceiver(new NT4Publisher());
-
+        Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
+        Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
         // for advantagekit
         Logger.start();
 
         // logs motor data
         URCL.start();
 
+        m_robotContainer = new RobotContainer();
+
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
-        Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-        m_robotContainer = new RobotContainer();
+
     }
 
     /**
