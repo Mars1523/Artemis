@@ -26,6 +26,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Red alliance",
+  "folder": null,
   "choreoAuto": false
 }
