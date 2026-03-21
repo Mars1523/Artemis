@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
+import frc.robot.commands.autos.Shooting;
+import frc.robot.commands.autos.climbAuto;
 import frc.robot.subsystems.AimingSub;
 import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -62,6 +64,7 @@ public class RobotContainer {
 
     private void configureAutos() {
         Shuffleboard.getTab("auto").add(autoChooser);
+        autoChooser.addOption("Climb", new climbAuto(climbSubsystem, swerveDriveSubsystem));
     }
 
     private void configureBindings() {
@@ -72,10 +75,15 @@ public class RobotContainer {
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
         primaryJoy.button(8).whileTrue(climbSubsystem.armUpCommand());
         primaryJoy.button(7).whileTrue(climbSubsystem.armDownCommand());
+        primaryJoy.button(9).whileTrue(climbSubsystem.armUpCommand2());
+        primaryJoy.button(10).whileTrue(climbSubsystem.armDownCommand2());
+        primaryJoy.button(6).onTrue(new climbAuto(climbSubsystem, swerveDriveSubsystem));
 
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
         commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
+        //commandXboxController.b().whileTrue(intakeSubsystem.runIntakeReverse());
         commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
+        commandXboxController.x().whileTrue(new Shooting(swerveDriveSubsystem, turretSubsystem, launcherSubsystem));
 
         // intake up needs to wait for turret to point forwards
         commandXboxController

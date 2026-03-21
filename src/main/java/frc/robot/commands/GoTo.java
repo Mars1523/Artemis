@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class GoTo {
 
-    private static final int redReefNTagID = 10;
+    private static final int redHub = 10;
     private static final int redReefNETagID = 9;
     private static final int redReefNWTagID = 11;
     private static final int redReefSTagID = 7;
@@ -24,7 +24,7 @@ public class GoTo {
     private static final int redCsLeftTagID = 1;
     private static final int redCsRightTagID = 2;
     private static final int blueClimbTagID = 31;
-    private static final int blueReefNTagID = 21;
+    private static final int blueHub = 25;
     private static final int blueReefNETagID = 22;
     private static final int blueReefNWTagID = 20;
     private static final int blueReefSTagID = 18;
@@ -47,7 +47,7 @@ public class GoTo {
     private static Pose2d inFrontOfTag(int id) {
         Transform2d rot180 = new Transform2d(Translation2d.kZero, Rotation2d.k180deg);
         var tag = kTagLayout.getTagPose(id).get().toPose2d();
-        var offset = new Transform2d(1.2, 0, new Rotation2d());
+        var offset = new Transform2d(1.5, 0, new Rotation2d()); // 67
         Pose2d infrontOfTag = tag.plus(offset).transformBy(rot180);
         return infrontOfTag;
     }
@@ -57,6 +57,15 @@ public class GoTo {
                 AutoBuilder.pathfindToPose(inFrontOfTag(redClimbTagID), constraints)
                         .alongWith(Commands.print("going to tag ID " + redClimbTagID)),
                 AutoBuilder.pathfindToPose(inFrontOfTag(blueClimbTagID), constraints)
+                        .alongWith(Commands.print("going to tag ID " + blueClimbTagID)),
+                GoTo::isRed);
+    }
+
+    public static Command shootLineUp() {
+        return Commands.either(
+                AutoBuilder.pathfindToPose(inFrontOfTag(redHub), constraints)
+                        .alongWith(Commands.print("going to tag ID " + redClimbTagID)),
+                AutoBuilder.pathfindToPose(inFrontOfTag(blueHub), constraints)
                         .alongWith(Commands.print("going to tag ID " + blueClimbTagID)),
                 GoTo::isRed);
     }

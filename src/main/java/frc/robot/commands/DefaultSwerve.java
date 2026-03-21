@@ -37,6 +37,25 @@ public class DefaultSwerve extends Command {
         var ySpeed = (MathUtil.applyDeadband(-joy.getX(), 0.1));
         var rot = (MathUtil.applyDeadband(-joy.getTwist(), 0.1));
 
+        // if (joy.getPOV() == 0) {
+        //    xSpeed = 0;
+        //    ySpeed = 0.2;
+        // }
+        if (joy.getPOV() == 90) {
+            xSpeed = 0;
+            ySpeed = 0;
+            rot = -0.2;
+        }
+        // if (joy.getPOV() == 180) {
+        //    xSpeed = 0.2;
+        //    ySpeed = 0;
+        // }
+        if (joy.getPOV() == 270) {
+            xSpeed = 0;
+            ySpeed = 0;
+            rot = 0.2;
+        }
+
         xSpeed = signedPow(xSpeed, 2);
         ySpeed = signedPow(ySpeed, 2);
         rot = signedPow(rot * .7, 3);
@@ -57,7 +76,7 @@ public class DefaultSwerve extends Command {
             rot *= 0.25;
         }
 
-        swerveSub.drive(xSpeed, ySpeed, rot, DriveMode.JOYSTICK);
+        swerveSub.drive(xSpeed, ySpeed, rot, DriveMode.FIELD);
     }
 
     @Override

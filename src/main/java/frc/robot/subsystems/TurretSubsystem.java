@@ -100,6 +100,7 @@ public class TurretSubsystem extends SubsystemBase {
     // Translation2d UpHome;
     // Translation2d DownHome;
     // Translation2d target;
+    Rotation2d rot = Rotation2d.fromDegrees(4.07);
 
     public Command shootAtHomeCommand() {
         return run(() -> shootAtHome());
@@ -133,6 +134,10 @@ public class TurretSubsystem extends SubsystemBase {
         }
         Logger.recordOutput("Turret/setpoint", turretsetpoint);
         turretController.setSetpoint(turretsetpoint, ControlType.kPosition);
+    }
+
+    public boolean isTurretReady() {
+        return (Math.abs(getTurretAngle().minus(getTurretSetpoint()).getDegrees()) < 12);
     }
 
     public Rotation2d getTurretSetpoint() {

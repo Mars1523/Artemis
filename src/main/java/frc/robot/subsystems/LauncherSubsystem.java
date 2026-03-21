@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -70,9 +71,9 @@ public class LauncherSubsystem extends SubsystemBase {
     SparkClosedLoopController motorController;
 
     // feedforward terms determined using sysid, see below
-    public static final double kS = 0.069104;
-    public static final double kV = 0.10922;
-    // public static final double kA = 0.0067792;
+    public static final double kS = 0.074593;
+    public static final double kV = 0.11055;
+    // public static final double kA = 0.0073589;
     public static final double kA = 0;
 
     public Slot0Configs slot0ConfigsLeft = new Slot0Configs();
@@ -188,32 +189,42 @@ public class LauncherSubsystem extends SubsystemBase {
         return run(() -> shootVelocity(RotationsPerSecond.of(rps))).finallyDo(() -> leftMotor.set(0));
     }
 
-    public void runFeedIfReady() {
-        double hopperDuty = 0;
-        double turretFeedDuty = 0;
-        if (leftMotor.getVelocity().getValueAsDouble() > kMinRpsToRunTurretFeed) {
-            turretFeedDuty = kTurretFeedDuty;
-            hopperDuty = kHopperDuty;
-        }
-        hopperMotor.set(hopperDuty);
-        turretFeedMotor.set(turretFeedDuty);
+    public void runFeed() {
+        hopperMotor.set(kHopperDuty);
+        turretFeedMotor.set(kTurretFeedDuty);
+    }
+
+    public void stopFeed() {
+        hopperMotor.set(0);
+        turretFeedMotor.set(0);
+    }
+
+    public boolean isLauncherReady() {
+        // 1.5 rps is 90 rpm
+        return Math.abs(leftMotor.getClosedLoopError().getValueAsDouble()) < 1.5;
     }
 
     public Command shootManually() {
         return run(() -> {
-                    shootVelocity(kManualLaunchVelocity);
-                    runFeedIfReady();
+                    runFeed();
+                    shootDistance(Meters.of(3.156));
                 })
                 .finallyDo(() -> turnOff());
     }
 
     public void shootVelocity(AngularVelocity speed) {
+        Logger.recordOutput("Launcher/SetpointRPS", speed.abs(RotationsPerSecond));
         leftMotor.setControl(velocityRequest.withVelocity(speed));
     }
 
     public void shootDistance(Distance distance) {
+        Logger.recordOutput("Launcher/SetpointDistance", distance.abs(Meters));
         AngularVelocity rps = launcherRpsForDistance(distance);
         shootVelocity(rps);
+    }
+
+    public Command shootDistanceCommand(Distance distance) {
+        return run(() -> shootDistance(distance));
     }
 
     public void turnOff() {
@@ -234,8 +245,8 @@ public class LauncherSubsystem extends SubsystemBase {
         double a = -1.29e-06;
         double b = 9.63e-04;
         double c = 1.72e-02;
-        // double d = 3.99e01;
-        double d = 3.99e01 + 2.5;
+        double d = 3.99e01;
+        // double d = 3.99e01 + 2.5;
         double distanceInches = distance.abs(Inches);
         double launcherRps = a * Math.pow(distanceInches, 3) + b * Math.pow(distanceInches, 2) + c * distanceInches + d;
         return RotationsPerSecond.of(launcherRps);
@@ -244,7 +255,11 @@ public class LauncherSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+        Logger.recordOutput("isLauncherReady", isLauncherReady());
+        Logger.recordOutput("Launcher/LauncherPosition", leftMotor.getPosition().getValueAsDouble());
         Logger.recordOutput("Launcher/LauncherRPS", leftMotor.getVelocity().getValueAsDouble());
+        Logger.recordOutput(
+                "Launcher/LauncherVoltage", leftMotor.getMotorVoltage().getValueAsDouble());
         Logger.recordOutput(
                 "Launcher/TurretFeedRPM", turretFeedMotor.getEncoder().getVelocity());
         Logger.recordOutput("Launcher/HopperRPM", hopperMotor.getEncoder().getVelocity());

@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -190,7 +191,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public ChassisSpeeds getChassisSpeeds() {
-        return swerveDrive.getFieldVelocity();
+        return getRealFieldVelocity();
     }
 
     public Pose2d getPose() {
@@ -221,6 +222,24 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * resets the angle at which the joystick considers forward, based on the robot's current pose
      */
     public Command resetJoystickForwardAngle() {
-        return run(() -> joystickForwardAngle = swerveDrive.getOdometryHeading());
+        return run(() -> {
+            if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+                joystickForwardAngle = swerveDrive.getOdometryHeading().plus(Rotation2d.k180deg);
+            } else {
+                joystickForwardAngle = swerveDrive.getOdometryHeading();
+            }
+        });
+    }
+
+    public ChassisSpeeds getRealFieldVelocity() {
+        // ChassisSpeeds has a method to convert from field-relative to robot-relative speeds,
+        // but not the reverse.  However, because this transform is a simple rotation, negating the
+        // angle given as the robot angle reverses the direction of rotation, and the conversion is reversed.
+        // ChassisSpeeds robotRelativeSpeeds = swerveDrive.kinematics.toChassisSpeeds(swerveDrive.getStates());
+        // return ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, swerveDrive.getOdometryHeading());
+        // Might need to be this instead
+        return ChassisSpeeds.fromFieldRelativeSpeeds(
+                swerveDrive.kinematics.toChassisSpeeds(swerveDrive.getStates()),
+                swerveDrive.getOdometryHeading().unaryMinus());
     }
 }
