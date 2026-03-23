@@ -13,7 +13,7 @@ public class climbAuto extends SequentialCommandGroup {
     public climbAuto(Climb climbSubsystem, SwerveDriveSubsystem swerveDriveSubsystem) {
         this.climbSubsystem = climbSubsystem;
         this.swerveDriveSubsystem = swerveDriveSubsystem;
-        
+
         addCommands(
                 new ParallelCommandGroup(climbSubsystem.armDownCommand(), climbSubsystem.armDownCommand2()),
                 new WaitCommand(5),

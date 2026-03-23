@@ -20,6 +20,7 @@ public class Shooting extends SequentialCommandGroup {
         this.turretSubsystem = turretSubsystem;
         this.launcherSubsystem = launcherSubsystem;
 
+        addRequirements(turretSubsystem, launcherSubsystem);
         addCommands(
                 turretSubsystem.setTurretAngleCommand(Rotation2d.fromDegrees(-4.07)),
                 Commands.waitUntil(turretSubsystem::isTurretReady),

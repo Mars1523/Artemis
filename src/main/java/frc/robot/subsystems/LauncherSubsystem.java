@@ -52,7 +52,7 @@ public class LauncherSubsystem extends SubsystemBase {
     private final SparkMax hopperMotor = new SparkMax(CanIdConstants.kHopperCanId, MotorType.kBrushless);
     public final double kHopperDuty = 0.5;
 
-    public final AngularVelocity kManualLaunchVelocity = RotationsPerSecond.of(55);
+    public final AngularVelocity kManualLaunchVelocity = RotationsPerSecond.of(60);
 
     VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
@@ -245,8 +245,8 @@ public class LauncherSubsystem extends SubsystemBase {
         double a = -1.29e-06;
         double b = 9.63e-04;
         double c = 1.72e-02;
-        double d = 3.99e01;
-        // double d = 3.99e01 + 2.5;
+        // double d = 3.99e01;
+        double d = 3.99e01 + 2.5;
         double distanceInches = distance.abs(Inches);
         double launcherRps = a * Math.pow(distanceInches, 3) + b * Math.pow(distanceInches, 2) + c * distanceInches + d;
         return RotationsPerSecond.of(launcherRps);

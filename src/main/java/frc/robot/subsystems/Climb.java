@@ -17,7 +17,7 @@ import frc.robot.NTDouble;
 import org.littletonrobotics.junction.Logger;
 
 public class Climb extends SubsystemBase {
-    NTDouble climbSpeed = new NTDouble(-.6, "ClimbSpeedUp");
+    NTDouble climbSpeed = new NTDouble(-.8, "ClimbSpeedUp");
 
     SwerveDriveSubsystem swerve;
     private final SparkMax climb1 = new SparkMax(61, MotorType.kBrushless);

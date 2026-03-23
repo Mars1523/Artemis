@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
+import frc.robot.commands.autos.LeftDepot;
 import frc.robot.commands.autos.Shooting;
 import frc.robot.commands.autos.climbAuto;
 import frc.robot.subsystems.AimingSub;
@@ -65,6 +66,7 @@ public class RobotContainer {
     private void configureAutos() {
         Shuffleboard.getTab("auto").add(autoChooser);
         autoChooser.addOption("Climb", new climbAuto(climbSubsystem, swerveDriveSubsystem));
+        autoChooser.addOption("LeftDepotReal", new LeftDepot(swerveDriveSubsystem, intakeSubsystem, aimingSub));
     }
 
     private void configureBindings() {
@@ -81,7 +83,7 @@ public class RobotContainer {
 
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
         commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
-        //commandXboxController.b().whileTrue(intakeSubsystem.runIntakeReverse());
+        // commandXboxController.b().whileTrue(intakeSubsystem.runIntakeReverse());
         commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
         commandXboxController.x().whileTrue(new Shooting(swerveDriveSubsystem, turretSubsystem, launcherSubsystem));
 
