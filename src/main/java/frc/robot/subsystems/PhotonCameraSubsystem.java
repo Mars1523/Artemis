@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -81,6 +82,8 @@ public class PhotonCameraSubsystem extends SubsystemBase {
                 if (!hasLowAmb(result, maxPoseAmbiguity)) continue;
 
                 Optional<EstimatedRobotPose> visionEst = estimatedPose(cam.estimator, result);
+                Logger.recordOutput(
+                        "Photon/" + cam.camera.getName() + "EstimatedPose3D", visionEst.get().estimatedPose);
                 updateEstimationStdDevs(visionEst, result.getTargets());
 
                 poses.add(visionEst.get().estimatedPose.toPose2d());
@@ -114,7 +117,8 @@ public class PhotonCameraSubsystem extends SubsystemBase {
         Rotation2d averageRotation = new Rotation2d(Math.atan2(s / poses.size(), c / poses.size()));
         Pose2d averagePose = new Pose2d(x, y, averageRotation);
 
-        estConsumer.accept(averagePose, newestTs, getEstimationStdDevs());
+        var estimationStdDevs = getEstimationStdDevs();
+        estConsumer.accept(averagePose, newestTs, estimationStdDevs);
 
         //     if (results.size() > 0) {
         //         var result = results.get(results.size() - 1);
@@ -124,6 +128,9 @@ public class PhotonCameraSubsystem extends SubsystemBase {
         //         }
         //     }
         // }
+
+        Logger.recordOutput("Photon/EstimatedPose2D", averagePose);
+        Logger.recordOutput("Photon/EstimationStdDevs", estimationStdDevs);
     }
 
     /**
