@@ -79,10 +79,10 @@ public final class Constants {
         // I think its safe to remove all but one camera... I think...
 
         public static final Transform3d kRobotToCameraRight = new Transform3d(
-                new Translation3d(0.139, 0.324, 0.254),
+                new Translation3d(0.139, -0.324, 0.254),
                 new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(-90)));
         public static final Transform3d kRobotToCameraLeft = new Transform3d(
-                new Translation3d(-0.254, -0.2413, 0.254),
+                new Translation3d(-0.254, 0.2413, 0.254),
                 new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(135)));
 
         public static final double maxPoseAmbiguity = 0.2;
