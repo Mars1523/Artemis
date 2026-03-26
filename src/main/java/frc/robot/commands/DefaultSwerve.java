@@ -76,7 +76,7 @@ public class DefaultSwerve extends Command {
             rot *= 0.25;
         }
 
-        swerveSub.drive(xSpeed, ySpeed, rot, DriveMode.FIELD);
+        swerveSub.drive(xSpeed, ySpeed, rot, DriveMode.JOYSTICK);
     }
 
     @Override

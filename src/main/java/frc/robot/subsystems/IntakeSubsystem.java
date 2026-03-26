@@ -26,8 +26,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     SparkClosedLoopController armController = intakeArm.getClosedLoopController();
 
-    NTDouble intakeMotorSpeed = new NTDouble(0.9, "intakeMotorSpeed");
-    NTDouble hopperMotorSpeed = new NTDouble(0.55, "hopperMotorSpeed");
+    NTDouble intakeMotorSpeed = new NTDouble(1, "intakeMotorSpeed");
 
     NTDouble intakeMotorReverseSpeed = new NTDouble(-0.5, "intakeMotorReverseSpeed");
     NTDouble hopperMotorReverseSpeed = new NTDouble(-0.5, "hopperMotorReverseSpeed");

@@ -78,6 +78,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         // https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964
         swerveDrive.setAngularVelocityCompensation(true, true, 0.1);
 
+        // if robot is on red team, set the forward angle to the left
+
         initializeAuto();
     }
 
@@ -158,17 +160,26 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         var rotationSpeed =
                 rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.kMaxAngularVelocityRadiansPerSecond;
 
+        Translation2d translation = new Translation2d(xSpeed, ySpeed);
+
         switch (driveMode) {
-            case FIELD:
-                swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, true, false);
-                break;
+            // case FIELD:
+            // swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, true,
+            // false);
+            // break;
             case ROBOT:
-                swerveDrive.drive(new Translation2d(xSpeed, ySpeed), rotationSpeed, false, false);
+                swerveDrive.drive(translation, rotationSpeed, false, false);
                 break;
             case JOYSTICK:
+                // Optional
+                // translation = SwerveMath.cubeTranslation(translation);
+                if (DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red) {
+                    translation = translation.rotateBy(Rotation2d.k180deg);
+                }
                 Rotation2d fieldHeading = swerveDrive.getOdometryHeading().minus(joystickForwardAngle);
-                ChassisSpeeds chassisSpeeds =
-                        ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rotationSpeed, fieldHeading);
+                ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                        translation.getX(), translation.getY(), rotationSpeed, fieldHeading);
                 swerveDrive.drive(chassisSpeeds, false, new Translation2d());
                 break;
         }
@@ -223,11 +234,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      */
     public Command resetJoystickForwardAngle() {
         return run(() -> {
-            if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
-                joystickForwardAngle = swerveDrive.getOdometryHeading().plus(Rotation2d.k180deg);
-            } else {
-                joystickForwardAngle = swerveDrive.getOdometryHeading();
-            }
+            joystickForwardAngle = swerveDrive.getOdometryHeading();
         });
     }
 

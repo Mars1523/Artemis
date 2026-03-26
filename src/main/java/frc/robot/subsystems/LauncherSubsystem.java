@@ -45,12 +45,12 @@ public class LauncherSubsystem extends SubsystemBase {
 
     // blue motor under the turret
     private final SparkMax turretFeedMotor = new SparkMax(CanIdConstants.kTurretFeedCanId, MotorType.kBrushless);
-    public final double kTurretFeedDuty = 0.5;
+    public final double kTurretFeedDuty = 0.7;
     public final double kMinRpsToRunTurretFeed = 40;
 
     // red bars inside the robot
     private final SparkMax hopperMotor = new SparkMax(CanIdConstants.kHopperCanId, MotorType.kBrushless);
-    public final double kHopperDuty = 0.5;
+    public final double kHopperDuty = 0.9;
 
     public final AngularVelocity kManualLaunchVelocity = RotationsPerSecond.of(60);
 
@@ -87,12 +87,12 @@ public class LauncherSubsystem extends SubsystemBase {
 
     public LauncherSubsystem() {
         turretFeedMotor.configure(
-                new SparkMaxConfig().smartCurrentLimit(20).idleMode(IdleMode.kBrake),
+                new SparkMaxConfig().smartCurrentLimit(10).idleMode(IdleMode.kBrake),
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
         hopperMotor.configure(
-                new SparkMaxConfig().smartCurrentLimit(20).inverted(true),
+                new SparkMaxConfig().smartCurrentLimit(10).inverted(true),
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
