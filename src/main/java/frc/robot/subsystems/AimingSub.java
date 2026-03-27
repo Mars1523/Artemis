@@ -80,22 +80,27 @@ public class AimingSub extends SubsystemBase {
     }
 
     public Command shootPhotonCommand() {
-        System.out.println("Shooting...");
         return run(() -> {
+                    Logger.recordOutput("Aiming/RunningShootPhotonCommand", true);
                     launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
                     turretSubsystem.setTurretAngle(this.turretAnglePhoton);
-                    // makes it never shoot often enough
-                    // if (launcherSubsystem.isLauncherReady() && turretSubsystem.isTurretReady()) {
-                    if (launcherSubsystem.isLauncherReady()) {
+                    if (isAimingReady()) {
                         launcherSubsystem.runFeed();
+                    } else {
+                        launcherSubsystem.stopFeed();
                     }
-                    launcherSubsystem.runFeed();
                     swerveDriveSubsystem.setIsShooting(true);
                 })
                 .finallyDo(() -> {
                     launcherSubsystem.turnOff();
                     swerveDriveSubsystem.setIsShooting(false);
                 });
+    }
+
+    public boolean isAimingReady() {
+        boolean isLauncherReady = launcherSubsystem.isLauncherReady();
+        boolean isTurretReady = turretSubsystem.isTurretReady();
+        return isLauncherReady && isTurretReady;
     }
 
     public Translation2d getHubPos() {
@@ -163,5 +168,7 @@ public class AimingSub extends SubsystemBase {
         Time estimatedTime = getTime(Meters.of(robotToHub.getNorm()));
         Logger.recordOutput("Aiming/EstimatedTime", estimatedTime);
         Logger.recordOutput("Aiming/robotToHubDistance", robotToHubDistance);
+
+        Logger.recordOutput("Aiming/IsAimingReady", isAimingReady());
     }
 }

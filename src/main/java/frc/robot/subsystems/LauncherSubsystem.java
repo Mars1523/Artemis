@@ -85,6 +85,9 @@ public class LauncherSubsystem extends SubsystemBase {
     public NTDouble targetRps = new NTDouble(10, "launcher/targetRPS");
     public NTDouble targetDistance = new NTDouble(0, "launcher/distance");
 
+    // 1.5 rps is 90 rpm
+    public NTDouble aimingLauncherTolerance = new NTDouble(1.5, "AimingLauncherTolerance");
+
     public LauncherSubsystem() {
         turretFeedMotor.configure(
                 new SparkMaxConfig().smartCurrentLimit(10).idleMode(IdleMode.kBrake),
@@ -200,8 +203,7 @@ public class LauncherSubsystem extends SubsystemBase {
     }
 
     public boolean isLauncherReady() {
-        // 1.5 rps is 90 rpm
-        return Math.abs(leftMotor.getClosedLoopError().getValueAsDouble()) < 1.5;
+        return Math.abs(leftMotor.getClosedLoopError().getValueAsDouble()) < aimingLauncherTolerance.get();
     }
 
     public Command shootManually() {
@@ -255,7 +257,7 @@ public class LauncherSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        Logger.recordOutput("isLauncherReady", isLauncherReady());
+        Logger.recordOutput("Launcher/IsLauncherReady", isLauncherReady());
         Logger.recordOutput("Launcher/LauncherPosition", leftMotor.getPosition().getValueAsDouble());
         Logger.recordOutput("Launcher/LauncherRPS", leftMotor.getVelocity().getValueAsDouble());
         Logger.recordOutput(
@@ -265,5 +267,7 @@ public class LauncherSubsystem extends SubsystemBase {
         Logger.recordOutput("Launcher/HopperRPM", hopperMotor.getEncoder().getVelocity());
         Logger.recordOutput("Launcher/TurretFeedDuty", turretFeedMotor.getAppliedOutput());
         Logger.recordOutput("Launcher/HopperDuty", hopperMotor.getAppliedOutput());
+        Logger.recordOutput(
+                "Launcher/LauncherRpsError", leftMotor.getClosedLoopError().getValueAsDouble());
     }
 }

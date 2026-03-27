@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CanIdConstants;
+import frc.robot.NTDouble;
 import org.littletonrobotics.junction.Logger;
 
 public class TurretSubsystem extends SubsystemBase {
@@ -34,6 +35,8 @@ public class TurretSubsystem extends SubsystemBase {
     // go from -0.28 to 0.72?
     private static final double kMinAngle = -0.28;
     private static final double kMaxAngle = 0.72;
+
+    NTDouble aimingTurretTolerance = new NTDouble(0.05, "AimingTurretTolerance"); // units of rotations
 
     SparkMaxConfig turretConfig = new SparkMaxConfig();
     // for PID constants finding
@@ -132,12 +135,11 @@ public class TurretSubsystem extends SubsystemBase {
         if (turretsetpoint < kMinAngle) {
             turretsetpoint += 1;
         }
-        Logger.recordOutput("Turret/setpoint", turretsetpoint);
         turretController.setSetpoint(turretsetpoint, ControlType.kPosition);
     }
 
     public boolean isTurretReady() {
-        return (Math.abs(getTurretAngle().minus(getTurretSetpoint()).getDegrees()) < 12);
+        return Math.abs(getEncoderError()) < aimingTurretTolerance.get();
     }
 
     public Rotation2d getTurretSetpoint() {
@@ -149,6 +151,10 @@ public class TurretSubsystem extends SubsystemBase {
         return new Rotation2d(turretMotor.getAbsoluteEncoder().getPosition());
     }
 
+    public double getEncoderError() {
+        return turretController.getSetpoint() - turretMotor.getAbsoluteEncoder().getPosition();
+    }
+
     public void shootAtHub() {
         var robotFieldPosition = swerve.getPose().getTranslation();
         var robotPoseAngle = swerve.getPose().getRotation();
@@ -156,7 +162,7 @@ public class TurretSubsystem extends SubsystemBase {
         var robotPoseToHopperAngle = robotToHopperFieldAngle.minus(robotPoseAngle);
 
         Logger.recordOutput("Turret/BlueHopperPosition", blueHopper);
-        Logger.recordOutput("Turret/RedHopperPosiiton", redHopper);
+        Logger.recordOutput("Turret/RedHopperPosition", redHopper);
         Logger.recordOutput("Turret/RobotFieldPosition", robotFieldPosition);
         Logger.recordOutput("Turret/RobotPoseAngle", robotPoseAngle.getDegrees());
         Logger.recordOutput("Turret/robotToHopperFieldAngle", robotToHopperFieldAngle.getDegrees());
@@ -212,23 +218,12 @@ public class TurretSubsystem extends SubsystemBase {
 
     }
 
-    /*
-    public Command turretting() {
-        return run(() -> turretController.setSetpoint(finalSetpoint, ControlType.kPosition));
-    }
-        */
-
     @Override
     public void periodic() {
-        Logger.recordOutput("Turret/TurretAngleRotations", getTurretAngle().getRotations());
-        /*
-        i = i.plus(Rotation2d.fromDegrees(1));
-        setTurretSetpoint(i);
-        Logger.recordOutput("Rotationi", i);
-        Logger.recordOutput("RotationFinal", finalSetpoint);
-        SmartDashboard.putNumber("ROtationI", i.getRotations());
-        SmartDashboard.putNumber("ROtationFinal", finalSetpoint);
-        */
-        // System.err.println(".,");
+        Logger.recordOutput("Turret/IsTurretReady", isTurretReady());
+        Logger.recordOutput(
+                "Turret/TurretAngleRotations", turretMotor.getAbsoluteEncoder().getPosition());
+        Logger.recordOutput("Turret/TurretSetpointRotations", turretController.getSetpoint());
+        Logger.recordOutput("Turret/TurretEncoderError", getEncoderError());
     }
 }
