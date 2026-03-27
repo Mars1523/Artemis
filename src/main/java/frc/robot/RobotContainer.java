@@ -39,10 +39,8 @@ public class RobotContainer {
 
     IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
-    TurretSubsystem turretSubsystem = new TurretSubsystem(swerveDriveSubsystem);
+    TurretSubsystem turretSubsystem = new TurretSubsystem();
     Climb climbSubsystem = new Climb();
-    // AimingSub aimSub = new AimingSub(swerveDriveSubsystem, turretSubsystem,
-    // launcherSubsystem);
     PhotonCameraSubsystem photonCameraSubsystem = new PhotonCameraSubsystem(
             swerveDriveSubsystem::acceptVisionData,
             () -> swerveDriveSubsystem.getRobotVelocity().omegaRadiansPerSecond);

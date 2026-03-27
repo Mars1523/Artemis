@@ -12,11 +12,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 // import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,7 +23,6 @@ import org.littletonrobotics.junction.Logger;
 
 public class TurretSubsystem extends SubsystemBase {
     // private Servo turret = new Servo(1);
-    private SwerveDriveSubsystem swerve;
     private SparkMax turretMotor = new SparkMax(CanIdConstants.kTurretRotateCanId, MotorType.kBrushless);
     SparkClosedLoopController turretController;
 
@@ -47,9 +43,7 @@ public class TurretSubsystem extends SubsystemBase {
     TrapezoidProfile trapezoidProfile = new TrapezoidProfile(new Constraints(30, 10));
     TrapezoidProfile.State trapezoidSetpoint = new TrapezoidProfile.State();
 
-    public TurretSubsystem(SwerveDriveSubsystem swerve) {
-        this.swerve = swerve;
-
+    public TurretSubsystem() {
         turretConfig.absoluteEncoder.zeroCentered(true);
         turretConfig.absoluteEncoder.inverted(true);
         turretConfig.encoder.positionConversionFactor(0.01111111111111).velocityConversionFactor(0.01111111111111);
@@ -70,47 +64,6 @@ public class TurretSubsystem extends SubsystemBase {
 
         turretMotor.configure(turretConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         turretMotor.getEncoder().setPosition(turretMotor.getAbsoluteEncoder().getPosition());
-    }
-
-    // private void setServoAngle(Rotation2d angle) {
-    //     var turretPercent = scale(angle.getDegrees(), -135, 135, 0, 1);
-    //     turret.set(turretPercent);
-    //     Logger.recordOutput("Turret/servoAngleDeg", angle.getDegrees());
-    //     Logger.recordOutput("Turret/servoTurnPercent", turretPercent);
-    // }
-
-    // private void checkAlliance() {
-    // if (isRed()) {
-    // targetHopper = redHopper;
-    // DownHome = new Translation2d(11.4, 2.5);
-    // UpHome = new Translation2d(11.4, 5.5);
-    // } else {
-    // targetHopper = blueHopper;
-    // DownHome = new Translation2d(4, 5.5);
-    // UpHome = new Translation2d(4, 2.5);
-    // }
-    // }
-
-    private Translation2d blueHopper = new Translation2d(4.621, 4.016);
-    private Translation2d redHopper = new Translation2d(11.945, 3.990);
-
-    Translation2d targetHopper() {
-        return isRed() ? redHopper : blueHopper;
-    }
-
-    // TODO: Make functions
-    // TODO: Make names better
-    // Translation2d UpHome;
-    // Translation2d DownHome;
-    // Translation2d target;
-    Rotation2d rot = Rotation2d.fromDegrees(4.07);
-
-    public Command shootAtHomeCommand() {
-        return run(() -> shootAtHome());
-    }
-
-    public Command shootAtHubCommand() {
-        return run(() -> shootAtHub());
     }
 
     private final double manualRotationFactor = 0.01;
@@ -153,69 +106,6 @@ public class TurretSubsystem extends SubsystemBase {
 
     public double getEncoderError() {
         return turretController.getSetpoint() - turretMotor.getAbsoluteEncoder().getPosition();
-    }
-
-    public void shootAtHub() {
-        var robotFieldPosition = swerve.getPose().getTranslation();
-        var robotPoseAngle = swerve.getPose().getRotation();
-        var robotToHopperFieldAngle = targetHopper().minus(robotFieldPosition).getAngle();
-        var robotPoseToHopperAngle = robotToHopperFieldAngle.minus(robotPoseAngle);
-
-        Logger.recordOutput("Turret/BlueHopperPosition", blueHopper);
-        Logger.recordOutput("Turret/RedHopperPosition", redHopper);
-        Logger.recordOutput("Turret/RobotFieldPosition", robotFieldPosition);
-        Logger.recordOutput("Turret/RobotPoseAngle", robotPoseAngle.getDegrees());
-        Logger.recordOutput("Turret/robotToHopperFieldAngle", robotToHopperFieldAngle.getDegrees());
-        Logger.recordOutput("Turret/robotPoseToHopperAngle", robotPoseToHopperAngle.getDegrees());
-        // Constants.kField.;
-        // turret.se(scaletarget.getDegrees());
-        setTurretAngle(robotPoseToHopperAngle);
-    }
-
-    public static boolean isRed() {
-        return getAlliance() == Alliance.Red;
-    }
-
-    public static Alliance getAlliance() {
-        return DriverStation.getAlliance().orElse(Alliance.Blue);
-    }
-
-    Translation2d UphomeR = new Translation2d(11.4, 5.5);
-    Translation2d DownhomeR = new Translation2d(11.4, 2.5);
-    Translation2d UphomeB = new Translation2d(4, 5.5);
-    Translation2d DownhomeB = new Translation2d(4, 2.5);
-    Translation2d target;
-
-    public void getHomeDirection(boolean RedAlliance, double yPos) {
-        if (RedAlliance) {
-            if (yPos > 4) {
-                target = UphomeR;
-            } else {
-                target = DownhomeR;
-            }
-        } else {
-            if (yPos > 4) {
-                target = UphomeB;
-            } else {
-                target = DownhomeB;
-            }
-        }
-    }
-
-    public void shootAtHome() {
-        Translation2d robotFieldPosition = swerve.getPose().getTranslation();
-        Rotation2d robotPoseAngle = swerve.getRotation();
-
-        getHomeDirection(isRed(), robotFieldPosition.getY());
-
-        var robotToTargetFieldAngle = target.minus(robotFieldPosition).getAngle();
-        var robotPoseToTargetAngle = robotToTargetFieldAngle.minus(robotPoseAngle);
-        setTurretAngle(robotPoseToTargetAngle);
-
-        // if(robotPoseToTargetAngle > 0){
-
-        // }
-
     }
 
     @Override
