@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.DriveConstants;
 import java.io.File;
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
@@ -42,6 +43,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final SlewRateLimiter yRateLimiter = new SlewRateLimiter(2);
     // caps the max rotational acceleration at 2 rad/s^2
     private final SlewRateLimiter rotRateLimiter = new SlewRateLimiter(2);
+    private boolean isShooting = false;
 
     // yagsl controller
     private SwerveDrive swerveDrive;
@@ -146,6 +148,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         PathfindingCommand.warmupCommand().schedule();
     }
 
+    public boolean getIsShooting() {
+        return isShooting;
+    }
+
+    public void setIsShooting(boolean isShooting) {
+        this.isShooting = isShooting;
+    }
+
     /**
      * Drives based on saved state of preferred joystick forward angle
      *
@@ -161,6 +171,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.kMaxAngularVelocityRadiansPerSecond;
 
         Translation2d translation = new Translation2d(xSpeed, ySpeed);
+        if (isShooting) {
+            translation = translation.times(DriveConstants.kSpeedReductonWhenShooting);
+            if (translation.getNorm() > DriveConstants.kMaxVelociyWhenShooting) {
+                translation = translation.times(DriveConstants.kMaxVelociyWhenShooting / translation.getNorm());
+            }
+        }
 
         switch (driveMode) {
             // case FIELD:
@@ -221,7 +237,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public void periodic() {
         swerveDrive.updateOdometry();
         Logger.recordOutput("Swerve/Pose2D", getPose());
-        Logger.recordOutput("Swerve/RobotVelocity", getRobotVelocity());
+
+        ChassisSpeeds robotVelocity = getRobotVelocity();
+        double robotSpeed = Math.sqrt(robotVelocity.vxMetersPerSecond * robotVelocity.vxMetersPerSecond
+                + robotVelocity.vyMetersPerSecond * robotVelocity.vyMetersPerSecond);
+        Logger.recordOutput("Swerve/RobotVelocity", robotVelocity);
+        Logger.recordOutput("Swerve/RobotSpeed", robotSpeed);
+        Logger.recordOutput("Swerve/isShooting", isShooting);
     }
 
     public void acceptVisionData(Pose2d pose, double timestamp, Matrix<N3, N1> estimationStdDevs) {

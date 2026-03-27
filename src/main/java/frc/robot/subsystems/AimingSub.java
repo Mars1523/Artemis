@@ -90,8 +90,12 @@ public class AimingSub extends SubsystemBase {
                         launcherSubsystem.runFeed();
                     }
                     launcherSubsystem.runFeed();
+                    swerveDriveSubsystem.setIsShooting(true);
                 })
-                .finallyDo(() -> launcherSubsystem.turnOff());
+                .finallyDo(() -> {
+                    launcherSubsystem.turnOff();
+                    swerveDriveSubsystem.setIsShooting(false);
+                });
     }
 
     public Translation2d getHubPos() {
