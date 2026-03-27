@@ -37,27 +37,13 @@ public class DefaultSwerve extends Command {
         var ySpeed = (MathUtil.applyDeadband(-joy.getX(), 0.1));
         var rot = (MathUtil.applyDeadband(-joy.getTwist(), 0.1));
 
-        // if (joy.getPOV() == 0) {
-        //    xSpeed = 0;
-        //    ySpeed = 0.2;
-        // }
-        if (joy.getPOV() == 90) {
-            xSpeed = 0;
-            ySpeed = 0;
-            rot = -0.2;
-        }
-        // if (joy.getPOV() == 180) {
-        //    xSpeed = 0.2;
-        //    ySpeed = 0;
-        // }
-        if (joy.getPOV() == 270) {
-            xSpeed = 0;
-            ySpeed = 0;
-            rot = 0.2;
-        }
+        // by multiplying both xSpeed and ySpeed by this number,
+        // we effectively apply the signedPow(2) behavior to the overall speed
+        // instead of xSpeed and ySpeed independently
+        var squareSpeedFactor = Math.sqrt(xSpeed * xSpeed + ySpeed * ySpeed);
+        xSpeed *= squareSpeedFactor;
+        ySpeed *= squareSpeedFactor;
 
-        xSpeed = signedPow(xSpeed, 2);
-        ySpeed = signedPow(ySpeed, 2);
         rot = signedPow(rot * .7, 3);
 
         if (!joy.getTrigger()) {
