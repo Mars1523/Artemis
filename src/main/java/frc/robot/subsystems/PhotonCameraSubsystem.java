@@ -130,7 +130,6 @@ public class PhotonCameraSubsystem extends SubsystemBase {
         // }
 
         Logger.recordOutput("Photon/EstimatedPose2D", averagePose);
-        Logger.recordOutput("Photon/EstimationStdDevs", estimationStdDevs);
     }
 
     /**
