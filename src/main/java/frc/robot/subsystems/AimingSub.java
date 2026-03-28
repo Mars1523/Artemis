@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Seconds;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -124,13 +126,22 @@ public class AimingSub extends SubsystemBase {
         }
 
         Translation2d robotToHub = targetPosition.minus(turretFieldPosition);
-        double xV = swerveDriveSubsystem.getChassisSpeeds().vxMetersPerSecond;
-        double yV = swerveDriveSubsystem.getChassisSpeeds().vyMetersPerSecond;
+
+        ChassisSpeeds robotVelocity = swerveDriveSubsystem.getChassisSpeeds();
+        Translation3d rotationVector = new Translation3d(0, 0, robotVelocity.omegaRadiansPerSecond);
+        Translation3d offset3d = new Translation3d(centerOffset.getX(), centerOffset.getY(), 0);
+        Translation3d turretVelocityFromRotation3d = new Translation3d(rotationVector.cross(offset3d));
+        Translation2d turretVelocityFromRotation =
+                new Translation2d(turretVelocityFromRotation3d.getX(), turretVelocityFromRotation3d.getY());
+        Translation2d turretTranslationalVelocity =
+                new Translation2d(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond);
+        Translation2d turretVelocity = turretTranslationalVelocity.plus(turretVelocityFromRotation);
+
         Distance hubDistance = Meters.of(robotToHub.getNorm());
         Time time = getTime(hubDistance);
 
-        for (int i = 0; i < 4; i++) {
-            Translation2d compensation = new Translation2d(xV * time.abs(Seconds), yV * time.abs(Seconds));
+        for (int i = 0; i < 10; i++) {
+            Translation2d compensation = turretVelocity.times(time.abs(Seconds));
             robotToHub = targetPosition.minus(turretFieldPosition).minus(compensation);
             hubDistance = Meters.of(robotToHub.getNorm());
             time = getTime(hubDistance);
@@ -168,5 +179,13 @@ public class AimingSub extends SubsystemBase {
         Logger.recordOutput("Aiming/TurretPose2d", turretPose2d);
 
         Logger.recordOutput("Aiming/TargetPosition", targetPosition);
+
+        Translation2d targetPositionRobotFrame = turretFieldPosition.plus(robotToHub);
+        Logger.recordOutput("Aiming/TargetPositionRobotFrame", targetPositionRobotFrame);
+
+        Logger.recordOutput("Aiming/TurretVelocityFromRotation", turretVelocityFromRotation);
+        Logger.recordOutput("Aiming/TurretVelocityFromRotation3d", turretVelocityFromRotation3d);
+        Logger.recordOutput("Aiming/TurretTranslationalVelocity", turretTranslationalVelocity);
+        Logger.recordOutput("Aiming/TurretVelocity", turretVelocity);
     }
 }
