@@ -38,6 +38,7 @@ import swervelib.telemetry.SwerveDriveTelemetry;
  * web tool for generating config files: https://yet-another-software-suite.github.io/YAGSL/config_generator/
  */
 public class SwerveDriveSubsystem extends SubsystemBase {
+
     // caps each max translational accelerations at 2 m/s^2
     private final SlewRateLimiter xRateLimiter = new SlewRateLimiter(2);
     private final SlewRateLimiter yRateLimiter = new SlewRateLimiter(2);
@@ -122,8 +123,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         // live
                         // in your
                         // Constants class
-                        new PIDConstants(5, 0.0, 0.0), // Translation PID constants
-                        new PIDConstants(3, 0.0, 0.0) // Rotation PID constants
+                        new PIDConstants(9, 0.005, 0.03), // 7, 0.004, 0.02 Translation PID constants
+                        new PIDConstants(6, 0.0, 0) // 5, 0, 0 Rotation PID constants
                         // Max module speed, in m/s // Drive base radius in meters. Distance from robot
                         // center to
                         // furthest module.

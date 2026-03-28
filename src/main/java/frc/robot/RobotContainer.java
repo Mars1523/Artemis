@@ -6,6 +6,9 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -16,14 +19,18 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.LeftDepot;
 import frc.robot.commands.autos.Shooting;
+import frc.robot.commands.autos.TestAuto3;
 import frc.robot.subsystems.AimingSub;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.PhotonCameraSubsystem;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
+import java.io.IOException;
+import org.json.simple.parser.ParseException;
 
 public class RobotContainer {
+
     CommandJoystick primaryJoy = new CommandJoystick(0);
     CommandXboxController commandXboxController = new CommandXboxController(1);
     SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
@@ -38,8 +45,9 @@ public class RobotContainer {
     IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
     TurretSubsystem turretSubsystem = new TurretSubsystem();
-    // currently not using climb, uncomment this line and related climb autos/buttons if we change back
     // Climb climbSubsystem = new Climb();
+    // AimingSub aimSub = new AimingSub(swerveDriveSubsystem, turretSubsystem,
+    // launcherSubsystem);
     PhotonCameraSubsystem photonCameraSubsystem = new PhotonCameraSubsystem(
             swerveDriveSubsystem::acceptVisionData,
             () -> swerveDriveSubsystem.getRobotVelocity().omegaRadiansPerSecond);
@@ -74,8 +82,24 @@ public class RobotContainer {
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
         // primaryJoy.button(8).whileTrue(climbSubsystem.armUpCommand());
         // primaryJoy.button(7).whileTrue(climbSubsystem.armDownCommand());
-        // primaryJoy.button(9).whileTrue(climbSubsystem.armUpCommand2());
+        // primaryJoy.button(9).whileTrue(climbSubsystem.armUpCommand2()); 9 WORKS, 11 only drive, 10 only intake, 8
+        // only drive
         // primaryJoy.button(10).whileTrue(climbSubsystem.armDownCommand2());
+        var testAuto = new PathPlannerAuto("TestShoot");
+        testAuto.event("shootAtHub").whileTrue(aimingSub.shootPhotonCommand());
+
+        primaryJoy.button(11).onTrue(testAuto);
+
+        primaryJoy.button(10).onTrue(new PathPlannerAuto("TestAuto2"));
+
+        primaryJoy.button(9).onTrue(new TestAuto3(swerveDriveSubsystem, intakeSubsystem));
+
+        try {
+            primaryJoy.button(8).onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TestAutoPath")));
+        } catch (FileVersionException | IOException | ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         // primaryJoy.button(6).onTrue(new climbAuto(climbSubsystem, swerveDriveSubsystem));
 
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
