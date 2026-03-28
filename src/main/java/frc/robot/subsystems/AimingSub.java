@@ -23,8 +23,17 @@ public class AimingSub extends SubsystemBase {
     private TurretSubsystem turretSubsystem;
     private LauncherSubsystem launcherSubsystem;
 
-    private Translation2d blueHub = new Translation2d(4.621, 4.016);
-    private Translation2d redHub = new Translation2d(11.945, 3.990);
+    // see here: https://firstfrc.blob.core.windows.net/frc2026/FieldAssets/2026-field-dimension-dwgs.pdf
+    // values given in pdf are in inches, convert to meters
+    // these are the "Welded" perimeter values (not AndyMark)
+
+    // 158.32 inches
+    private final double kArenaCenterY = 4.034663;
+    private final double kArenaBlueTransitionX = 4.625594;
+    private final double kArenaRedTransitionX = 11.915394;
+
+    private Translation2d blueHub = new Translation2d(kArenaBlueTransitionX, kArenaCenterY);
+    private Translation2d redHub = new Translation2d(kArenaRedTransitionX, kArenaCenterY);
 
     private Translation2d UphomeR = new Translation2d(11.4, 5.5);
     private Translation2d DownhomeR = new Translation2d(11.4, 2.5);
@@ -157,5 +166,7 @@ public class AimingSub extends SubsystemBase {
                 robotPoseAngle.plus(turretSubsystem.getTurretAngle().unaryMinus());
         Pose2d turretPose2d = new Pose2d(turretFieldPosition, turretFieldAngle);
         Logger.recordOutput("Aiming/TurretPose2d", turretPose2d);
+
+        Logger.recordOutput("Aiming/TargetPosition", targetPosition);
     }
 }
