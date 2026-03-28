@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
@@ -17,13 +18,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
 public class AimingSub extends SubsystemBase {
-    private static final Translation2d centerOffset = new Translation2d(0.0762, 0.0635);
+    private static final Translation2d centerOffset = new Translation2d(-0.0762, 0.0635);
     private SwerveDriveSubsystem swerveDriveSubsystem;
     private TurretSubsystem turretSubsystem;
     private LauncherSubsystem launcherSubsystem;
-    private Translation2d hubPosition;
-    private Translation2d upHomePos;
-    private Translation2d downHomePos;
 
     private Translation2d blueHub = new Translation2d(4.621, 4.016);
     private Translation2d redHub = new Translation2d(11.945, 3.990);
@@ -43,22 +41,6 @@ public class AimingSub extends SubsystemBase {
         this.swerveDriveSubsystem = swerveDriveSubsystem;
         this.turretSubsystem = turretSubsystem;
         this.launcherSubsystem = launcherSubsystem;
-
-        /// BAD!!
-        final Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
-
-        // if(alliance == Alliance.Red){
-        //     upHomePos = UphomeR;
-        //     downHomePos = DownhomeR;
-        //     hubPosition = redHub;
-        // }
-        // else{
-        //     upHomePos = UphomeB;
-        //     downHomePos = DownhomeB;
-        //     hubPosition = blueHub;
-        // }
-        /// BAD
-
     }
 
     public Time getTime(Distance distance) {
@@ -123,17 +105,16 @@ public class AimingSub extends SubsystemBase {
     public void periodic() {
         Translation2d targetPosition;
         Rotation2d robotPoseAngle = swerveDriveSubsystem.getPose().getRotation();
-        // var robotFieldPosition =
-        //         swerveDriveSubsystem.getPose().getTranslation().plus(centerOffset.rotateBy(robotPoseAngle));
-        var robotFieldPosition = swerveDriveSubsystem.getPose().getTranslation();
+        Translation2d robotFieldPosition = swerveDriveSubsystem.getPose().getTranslation();
+        Translation2d turretFieldPosition = robotFieldPosition.plus(centerOffset.rotateBy(robotPoseAngle));
 
-        if (robotFieldPosition.getX() < 4.63 || robotFieldPosition.getX() > 11.91) {
+        if (turretFieldPosition.getX() < 4.63 || turretFieldPosition.getX() > 11.91) {
             targetPosition = getHubPos();
         } else {
-            targetPosition = robotFieldPosition.getY() > 4.03 ? getUpHomePos() : getDownHomePos();
+            targetPosition = turretFieldPosition.getY() > 4.03 ? getUpHomePos() : getDownHomePos();
         }
 
-        Translation2d robotToHub = targetPosition.minus(robotFieldPosition);
+        Translation2d robotToHub = targetPosition.minus(turretFieldPosition);
         double xV = swerveDriveSubsystem.getChassisSpeeds().vxMetersPerSecond;
         double yV = swerveDriveSubsystem.getChassisSpeeds().vyMetersPerSecond;
         Distance hubDistance = Meters.of(robotToHub.getNorm());
@@ -141,7 +122,7 @@ public class AimingSub extends SubsystemBase {
 
         for (int i = 0; i < 4; i++) {
             Translation2d compensation = new Translation2d(xV * time.abs(Seconds), yV * time.abs(Seconds));
-            robotToHub = targetPosition.minus(robotFieldPosition).minus(compensation);
+            robotToHub = targetPosition.minus(turretFieldPosition).minus(compensation);
             hubDistance = Meters.of(robotToHub.getNorm());
             time = getTime(hubDistance);
         }
@@ -170,5 +151,11 @@ public class AimingSub extends SubsystemBase {
         Logger.recordOutput("Aiming/robotToHubDistance", robotToHubDistance);
 
         Logger.recordOutput("Aiming/IsAimingReady", isAimingReady());
+
+        // record the actual turret angle here
+        Rotation2d turretFieldAngle =
+                robotPoseAngle.plus(turretSubsystem.getTurretAngle().unaryMinus());
+        Pose2d turretPose2d = new Pose2d(turretFieldPosition, turretFieldAngle);
+        Logger.recordOutput("Aiming/TurretPose2d", turretPose2d);
     }
 }

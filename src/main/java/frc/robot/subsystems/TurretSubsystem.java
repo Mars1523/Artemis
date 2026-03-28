@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.revrobotics.PersistMode;
@@ -14,6 +15,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.measure.Angle;
 // import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -101,7 +103,8 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     public Rotation2d getTurretAngle() {
-        return new Rotation2d(turretMotor.getAbsoluteEncoder().getPosition());
+        Angle angle = Rotations.of(turretMotor.getAbsoluteEncoder().getPosition());
+        return new Rotation2d(angle.in(Radians));
     }
 
     public double getEncoderError() {
