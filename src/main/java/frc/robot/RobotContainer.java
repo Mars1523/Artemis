@@ -16,9 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.LeftDepot;
 import frc.robot.commands.autos.Shooting;
-import frc.robot.commands.autos.climbAuto;
 import frc.robot.subsystems.AimingSub;
-import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.PhotonCameraSubsystem;
@@ -40,7 +38,8 @@ public class RobotContainer {
     IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     LauncherSubsystem launcherSubsystem = new LauncherSubsystem();
     TurretSubsystem turretSubsystem = new TurretSubsystem();
-    Climb climbSubsystem = new Climb();
+    // currently not using climb, uncomment this line and related climb autos/buttons if we change back
+    // Climb climbSubsystem = new Climb();
     PhotonCameraSubsystem photonCameraSubsystem = new PhotonCameraSubsystem(
             swerveDriveSubsystem::acceptVisionData,
             () -> swerveDriveSubsystem.getRobotVelocity().omegaRadiansPerSecond);
@@ -63,7 +62,7 @@ public class RobotContainer {
 
     private void configureAutos() {
         Shuffleboard.getTab("auto").add(autoChooser);
-        autoChooser.addOption("Climb", new climbAuto(climbSubsystem, swerveDriveSubsystem));
+        // autoChooser.addOption("Climb", new climbAuto(climbSubsystem, swerveDriveSubsystem));
         autoChooser.addOption("LeftDepotReal", new LeftDepot(swerveDriveSubsystem, intakeSubsystem, aimingSub));
     }
 
@@ -73,11 +72,11 @@ public class RobotContainer {
         // map primaryJoy 7 to climb down
 
         primaryJoy.button(12).whileTrue(swerveDriveSubsystem.resetJoystickForwardAngle());
-        primaryJoy.button(8).whileTrue(climbSubsystem.armUpCommand());
-        primaryJoy.button(7).whileTrue(climbSubsystem.armDownCommand());
-        primaryJoy.button(9).whileTrue(climbSubsystem.armUpCommand2());
-        primaryJoy.button(10).whileTrue(climbSubsystem.armDownCommand2());
-        primaryJoy.button(6).onTrue(new climbAuto(climbSubsystem, swerveDriveSubsystem));
+        // primaryJoy.button(8).whileTrue(climbSubsystem.armUpCommand());
+        // primaryJoy.button(7).whileTrue(climbSubsystem.armDownCommand());
+        // primaryJoy.button(9).whileTrue(climbSubsystem.armUpCommand2());
+        // primaryJoy.button(10).whileTrue(climbSubsystem.armDownCommand2());
+        // primaryJoy.button(6).onTrue(new climbAuto(climbSubsystem, swerveDriveSubsystem));
 
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
         commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
