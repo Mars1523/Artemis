@@ -55,7 +55,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public NTDouble maxVelociyWhenShooting = new NTDouble(1.2, "Swerve/MaxVelocityWhenShooting");
     public NTDouble rotationReductionWhenShooting = new NTDouble(0.5, "Swerve/RotationReductionWhenShooting");
     public NTDouble maxRotationRateWhenShooting =
-            new NTDouble(1.0, "Swerve/MaxRotationRateWhenShooting"); // radians/sec
+            new NTDouble(1.5, "Swerve/MaxRotationRateWhenShooting"); // radians/sec
 
     public SwerveDriveSubsystem() {
         // example code from yagsl: https://docs.yagsl.com/configuring-yagsl/code-setup
