@@ -132,9 +132,6 @@ public final class Constants {
 
         public static final double kMaxAngularVelocityRadiansPerSecond =
                 kMaxVelocityMetersPerSecond / Math.hypot(kTrackWidthMeters / 2, kTrackBaseMeters / 2) * .75;
-
-        public static final double kSpeedReductonWhenShooting = .5;
-        public static final double kMaxVelociyWhenShooting = 1.2;
     }
 
     public static final class ModuleConstants {
