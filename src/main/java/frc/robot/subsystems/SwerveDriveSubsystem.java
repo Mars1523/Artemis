@@ -15,7 +15,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -189,10 +188,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             case JOYSTICK:
                 // Optional
                 // translation = SwerveMath.cubeTranslation(translation);
-                if (DriverStation.getAlliance().isPresent()
-                        && DriverStation.getAlliance().get() == Alliance.Red) {
-                    translation = translation.rotateBy(Rotation2d.k180deg);
-                }
                 Rotation2d fieldHeading = swerveDrive.getOdometryHeading().minus(joystickForwardAngle);
                 ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                         translation.getX(), translation.getY(), rotationSpeed, fieldHeading);
