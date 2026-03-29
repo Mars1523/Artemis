@@ -51,6 +51,7 @@ public class LauncherSubsystem extends SubsystemBase {
     // red bars inside the robot
     private final SparkMax hopperMotor = new SparkMax(CanIdConstants.kHopperCanId, MotorType.kBrushless);
     public final double kHopperDuty = 0.9;
+    public final double kReverseHopperDuty = -0.8;
 
     public NTDouble manualLaunchVelocityRps = new NTDouble(55.0, "ManualLaunchVelocityRps");
 
@@ -210,6 +211,15 @@ public class LauncherSubsystem extends SubsystemBase {
         return run(() -> {
                     runFeed();
                     shootVelocity(RotationsPerSecond.of(manualLaunchVelocityRps.get()));
+                })
+                .finallyDo(() -> turnOff());
+    }
+
+    public Command reverseHopper() {
+        return run(() -> {
+                    hopperMotor.set(kReverseHopperDuty);
+                    turretFeedMotor.set(0);
+                    leftMotor.set(0);
                 })
                 .finallyDo(() -> turnOff());
     }

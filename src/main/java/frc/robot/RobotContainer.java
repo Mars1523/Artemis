@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.LeftDepot;
-import frc.robot.commands.autos.Shooting;
 import frc.robot.subsystems.AimingSub;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
@@ -80,9 +79,10 @@ public class RobotContainer {
 
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
         commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
-        // commandXboxController.b().whileTrue(intakeSubsystem.runIntakeReverse());
         commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
-        commandXboxController.x().whileTrue(new Shooting(swerveDriveSubsystem, turretSubsystem, launcherSubsystem));
+
+        // for unsticking balls (potentially - not sure if needed)
+        commandXboxController.x().whileTrue(launcherSubsystem.reverseHopper());
 
         // intake up needs to wait for turret to point forwards
         commandXboxController
