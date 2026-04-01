@@ -117,7 +117,8 @@ public class AimingSub extends SubsystemBase {
         Translation2d targetPosition;
         Rotation2d robotPoseAngle = swerveDriveSubsystem.getPose().getRotation();
         Translation2d robotFieldPosition = swerveDriveSubsystem.getPose().getTranslation();
-        Translation2d turretFieldPosition = robotFieldPosition.plus(centerOffset.rotateBy(robotPoseAngle));
+        Translation2d currCenterOffset = centerOffset.rotateBy(robotPoseAngle);
+        Translation2d turretFieldPosition = robotFieldPosition.plus(currCenterOffset);
 
         if (turretFieldPosition.getX() < 4.63 || turretFieldPosition.getX() > 11.91) {
             targetPosition = getHubPos();
@@ -129,8 +130,8 @@ public class AimingSub extends SubsystemBase {
 
         ChassisSpeeds robotVelocity = swerveDriveSubsystem.getChassisSpeeds();
         Translation3d rotationVector = new Translation3d(0, 0, robotVelocity.omegaRadiansPerSecond);
-        Translation3d offset3d = new Translation3d(centerOffset.getX(), centerOffset.getY(), 0);
-        Translation3d turretVelocityFromRotation3d = new Translation3d(rotationVector.cross(offset3d));
+        Translation3d currCenterOffset3d = new Translation3d(currCenterOffset.getX(), currCenterOffset.getY(), 0);
+        Translation3d turretVelocityFromRotation3d = new Translation3d(rotationVector.cross(currCenterOffset3d));
         Translation2d turretVelocityFromRotation =
                 new Translation2d(turretVelocityFromRotation3d.getX(), turretVelocityFromRotation3d.getY());
         Translation2d turretTranslationalVelocity =
