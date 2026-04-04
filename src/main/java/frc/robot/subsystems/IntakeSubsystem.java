@@ -32,7 +32,7 @@ public class IntakeSubsystem extends SubsystemBase {
     NTDouble hopperMotorReverseSpeed = new NTDouble(-0.5, "hopperMotorReverseSpeed");
 
     SparkMaxConfig intakeArmConfig;
-    NTDouble intakeArmP = new NTDouble(2.8, "intakeArmP");
+    NTDouble intakeArmP = new NTDouble(3.3, "intakeArmP");
 
     public IntakeSubsystem() {
         intakeMotor.configure(
@@ -54,7 +54,7 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeArmConfig.absoluteEncoder.inverted(false);
         intakeArmConfig
                 .closedLoop
-                .outputRange(-0.2, 0.5)
+                .outputRange(-0.2, 0.75)
                 .pid(intakeArmP.get(), 0, 0)
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         intakeArm.configure(intakeArmConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

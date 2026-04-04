@@ -108,7 +108,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         boolean enableFeedforward = true;
         AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
-                this::resetOdometry, // Method to reset odometry (will be called if your auto has a
+                (p) -> {}, // Method to reset odometry (will be called if your auto has a
                 // starting pose)
                 this::getRobotVelocity, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
                 (speedsRobotRelative, moduleFeedForwards) -> {
@@ -236,9 +236,31 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return swerveDrive.getPose();
     }
 
-    public void resetOdometry(Pose2d pose) {
-        swerveDrive.resetOdometry(pose);
+    // for under trench auto. Could be used for aiming sub but its fine as is for now.
+    public boolean inNeutralZone() {
+        if (getPose().getX() > 4.63 && getPose().getX() < 11.91) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
+    public boolean inLeft() {
+        if ((getPose().getY() > 4
+                        && DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Blue)
+                || (getPose().getY() < 4
+                        && DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // public void resetOdometry(Pose2d pose) {
+    //    swerveDrive.resetOdometry(pose);
+    // }
 
     public ChassisSpeeds getRobotVelocity() {
         return swerveDrive.getRobotVelocity();

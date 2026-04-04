@@ -5,8 +5,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.events.EventTrigger;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,10 +16,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.autos.LeftDepot;
-import frc.robot.commands.autos.Shooting;
-import frc.robot.commands.autos.TestAuto3;
 import frc.robot.subsystems.AimingSub;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
@@ -57,13 +56,18 @@ public class RobotContainer {
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
 
-        NamedCommands.registerCommand("shootVelocityCommand", launcherSubsystem.shootVelocityCommand());
+        new EventTrigger("runIntake").whileTrue(intakeSubsystem.runIntake());
+        new EventTrigger("intakeDown").onTrue(intakeSubsystem.intakeDown());
+        new EventTrigger("intakeUp").onTrue(intakeSubsystem.intakeUp());
+        new EventTrigger("shootAtHub").whileTrue(aimingSub.shootPhotonCommand());
+        /*NamedCommands.registerCommand("shootVelocityCommand", launcherSubsystem.shootVelocityCommand());
         NamedCommands.registerCommand("intakeUp", intakeSubsystem.intakeUp());
         NamedCommands.registerCommand("intakeDown", intakeSubsystem.intakeDown());
         NamedCommands.registerCommand("runIntake", intakeSubsystem.runIntake());
         NamedCommands.registerCommand("runIntakeReverse", intakeSubsystem.runIntakeReverse());
         NamedCommands.registerCommand("shootAtHomeCommand", aimingSub.shootPhotonCommand());
         NamedCommands.registerCommand("shootAtHubCommand", aimingSub.shootPhotonCommand());
+        */
         configureAutos();
         configureBindings();
     }
@@ -75,6 +79,9 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+
+        var inNeutralZone = new Trigger(swerveDriveSubsystem::inNeutralZone);
+        var inLeft = new Trigger(swerveDriveSubsystem::inLeft);
         // todo: add climb (statud: done)
         // map primaryJoy 8 to climb up
         // map primaryJoy 7 to climb down
@@ -85,21 +92,39 @@ public class RobotContainer {
         // primaryJoy.button(9).whileTrue(climbSubsystem.armUpCommand2()); 9 WORKS, 11 only drive, 10 only intake, 8
         // only drive
         // primaryJoy.button(10).whileTrue(climbSubsystem.armDownCommand2());
-        var testAuto = new PathPlannerAuto("TestShoot");
-        testAuto.event("shootAtHub").whileTrue(aimingSub.shootPhotonCommand());
+        // var leftDepotAuto = new PathPlannerAuto("DepotLeftAuto");
+        // var leftNeutralAuto = new PathPlannerAuto("NeutralLeftAuto");
+        // var rightNeutralAuto = new PathPlannerAuto("NeutralRightAuto");
+        // testAuto.event("shootAtHub").whileTrue(aimingSub.shootPhotonCommand());
 
-        primaryJoy.button(11).onTrue(testAuto);
-
-        primaryJoy.button(10).onTrue(new PathPlannerAuto("TestAuto2"));
-
-        primaryJoy.button(9).onTrue(new TestAuto3(swerveDriveSubsystem, intakeSubsystem));
+        primaryJoy.button(9).onTrue(new PathPlannerAuto("DepotLeftAuto"));
 
         try {
-            primaryJoy.button(8).onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TestAutoPath")));
+            primaryJoy
+                    .button(10)
+                    .and(inLeft)
+                    .and(inNeutralZone)
+                    .onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TrenchLIn")));
+            primaryJoy
+                    .button(10)
+                    .and(inLeft)
+                    .and(inNeutralZone.negate())
+                    .onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TrenchLOut")));
+            primaryJoy
+                    .button(10)
+                    .and(inLeft.negate())
+                    .and(inNeutralZone)
+                    .onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TrenchRIn")));
+            primaryJoy
+                    .button(10)
+                    .and(inLeft.negate())
+                    .and(inNeutralZone.negate())
+                    .onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TrenchROut")));
         } catch (FileVersionException | IOException | ParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
         // primaryJoy.button(6).onTrue(new climbAuto(climbSubsystem, swerveDriveSubsystem));
 
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
@@ -107,7 +132,9 @@ public class RobotContainer {
         commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
 
         // for unsticking balls (potentially - not sure if needed)
-        commandXboxController.x().whileTrue(launcherSubsystem.reverseHopper());
+        commandXboxController
+                .x()
+                .whileTrue(Commands.parallel(intakeSubsystem.runIntakeReverse(), launcherSubsystem.reverseHopper()));
 
         // intake up needs to wait for turret to point forwards
         commandXboxController

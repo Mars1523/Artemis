@@ -64,10 +64,10 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.9265508684863522,
-      "maxWaypointRelativePos": 3.0,
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 1.1505739365293721,
       "constraints": {
-        "maxVelocity": 1.0,
+        "maxVelocity": 0.5,
         "maxAcceleration": 1.7,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -77,10 +77,10 @@
     },
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 0.5568238213399517,
+      "minWaypointRelativePos": 1.9265508684863522,
+      "maxWaypointRelativePos": 3.0,
       "constraints": {
-        "maxVelocity": 0.5,
+        "maxVelocity": 0.8,
         "maxAcceleration": 1.7,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -94,7 +94,7 @@
     {
       "name": "shootAtHub",
       "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": 3.0,
+      "endWaypointRelativePos": 1.0128291694800808,
       "command": {
         "type": "named",
         "data": {
@@ -112,6 +112,12 @@
           "name": "intakeDown"
         }
       }
+    },
+    {
+      "name": "shootAtHub",
+      "waypointRelativePos": 2.0094530722484816,
+      "endWaypointRelativePos": 3.0,
+      "command": null
     },
     {
       "name": "runIntake",

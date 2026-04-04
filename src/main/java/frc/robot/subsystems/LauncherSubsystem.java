@@ -45,7 +45,8 @@ public class LauncherSubsystem extends SubsystemBase {
 
     // blue motor under the turret
     private final SparkMax turretFeedMotor = new SparkMax(CanIdConstants.kTurretFeedCanId, MotorType.kBrushless);
-    public final double kTurretFeedDuty = 0.7;
+    public final double kTurretFeedDuty = 0.8;
+    public final double kReverseTurretFeedDuty = -0.8;
     public final double kMinRpsToRunTurretFeed = 40;
 
     // red bars inside the robot
@@ -218,7 +219,7 @@ public class LauncherSubsystem extends SubsystemBase {
     public Command reverseHopper() {
         return run(() -> {
                     hopperMotor.set(kReverseHopperDuty);
-                    turretFeedMotor.set(0);
+                    turretFeedMotor.set(kReverseTurretFeedDuty);
                     leftMotor.set(0);
                 })
                 .finallyDo(() -> turnOff());

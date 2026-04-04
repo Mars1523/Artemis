@@ -67,7 +67,7 @@
       "minWaypointRelativePos": 2.3,
       "maxWaypointRelativePos": 3.0,
       "constraints": {
-        "maxVelocity": 1.0,
+        "maxVelocity": 0.8,
         "maxAcceleration": 1.7,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -93,14 +93,9 @@
   "eventMarkers": [
     {
       "name": "shootAtHub",
-      "waypointRelativePos": 1.5,
-      "endWaypointRelativePos": 3.0,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "shootAtHub"
-        }
-      }
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 0.688723835246455,
+      "command": null
     },
     {
       "name": "intakeDown",
@@ -110,6 +105,17 @@
         "type": "named",
         "data": {
           "name": "intakeDown"
+        }
+      }
+    },
+    {
+      "name": "shootAtHub",
+      "waypointRelativePos": 1.9446320054017552,
+      "endWaypointRelativePos": 3.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "shootAtHub"
         }
       }
     },
