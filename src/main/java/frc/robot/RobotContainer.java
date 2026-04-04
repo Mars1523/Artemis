@@ -104,9 +104,10 @@ public class RobotContainer {
 
         commandXboxController.a().whileTrue(intakeSubsystem.runIntake());
         commandXboxController.b().whileTrue(aimingSub.shootPhotonCommand());
-        // commandXboxController.b().whileTrue(intakeSubsystem.runIntakeReverse());
         commandXboxController.y().whileTrue(launcherSubsystem.shootManually());
-        commandXboxController.x().whileTrue(new Shooting(swerveDriveSubsystem, turretSubsystem, launcherSubsystem));
+
+        // for unsticking balls (potentially - not sure if needed)
+        commandXboxController.x().whileTrue(launcherSubsystem.reverseHopper());
 
         // intake up needs to wait for turret to point forwards
         commandXboxController

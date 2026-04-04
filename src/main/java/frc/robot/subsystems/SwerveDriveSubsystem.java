@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.DriveConstants;
+import frc.robot.NTDouble;
 import java.io.File;
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
@@ -51,6 +51,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     // field angle at which joystick considers forward
     private Rotation2d joystickForwardAngle = Rotation2d.kZero;
+
+    public NTDouble speedReductonWhenShooting = new NTDouble(.5, "Swerve/SpeedReductionWhenShooting");
+    public NTDouble maxVelociyWhenShooting = new NTDouble(1.2, "Swerve/MaxVelocityWhenShooting");
+    public NTDouble rotationReductionWhenShooting = new NTDouble(0.5, "Swerve/RotationReductionWhenShooting");
+    public NTDouble maxRotationRateWhenShooting =
+            new NTDouble(1.5, "Swerve/MaxRotationRateWhenShooting"); // radians/sec
 
     public SwerveDriveSubsystem() {
         // example code from yagsl: https://docs.yagsl.com/configuring-yagsl/code-setup
@@ -168,14 +174,18 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public void drive(double xPercent, double yPercent, double rotPercent, DriveMode driveMode) {
         var xSpeed = xRateLimiter.calculate(xPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
         var ySpeed = yRateLimiter.calculate(yPercent) * Constants.DriveConstants.kMaxVelocityMetersPerSecond;
-        var rotationSpeed =
+        double rotationSpeed =
                 rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.kMaxAngularVelocityRadiansPerSecond;
 
         Translation2d translation = new Translation2d(xSpeed, ySpeed);
         if (isShooting) {
-            translation = translation.times(DriveConstants.kSpeedReductonWhenShooting);
-            if (translation.getNorm() > DriveConstants.kMaxVelociyWhenShooting) {
-                translation = translation.times(DriveConstants.kMaxVelociyWhenShooting / translation.getNorm());
+            translation = translation.times(speedReductonWhenShooting.get());
+            if (translation.getNorm() > maxVelociyWhenShooting.get()) {
+                translation = translation.times(maxVelociyWhenShooting.get() / translation.getNorm());
+            }
+            rotationSpeed *= rotationReductionWhenShooting.get();
+            if (rotationSpeed > maxRotationRateWhenShooting.get()) {
+                rotationSpeed = maxRotationRateWhenShooting.get();
             }
         }
 
@@ -242,6 +252,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         ChassisSpeeds robotVelocity = getRobotVelocity();
         double robotSpeed = Math.sqrt(robotVelocity.vxMetersPerSecond * robotVelocity.vxMetersPerSecond
                 + robotVelocity.vyMetersPerSecond * robotVelocity.vyMetersPerSecond);
+        Logger.recordOutput("Swerve/RobotRotationRate", robotVelocity.omegaRadiansPerSecond);
         Logger.recordOutput("Swerve/RobotVelocity", robotVelocity);
         Logger.recordOutput("Swerve/RobotSpeed", robotSpeed);
         Logger.recordOutput("Swerve/isShooting", isShooting);
