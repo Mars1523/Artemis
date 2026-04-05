@@ -5,10 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.events.EventTrigger;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -18,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DefaultSwerve;
+import frc.robot.commands.GoTo;
 import frc.robot.commands.autos.LeftDepot;
 import frc.robot.subsystems.AimingSub;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -25,8 +23,6 @@ import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.PhotonCameraSubsystem;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
-import java.io.IOException;
-import org.json.simple.parser.ParseException;
 
 public class RobotContainer {
 
@@ -76,6 +72,7 @@ public class RobotContainer {
         Shuffleboard.getTab("auto").add(autoChooser);
         // autoChooser.addOption("Climb", new climbAuto(climbSubsystem, swerveDriveSubsystem));
         autoChooser.addOption("LeftDepotReal", new LeftDepot(swerveDriveSubsystem, intakeSubsystem, aimingSub));
+        autoChooser.addOption("NeutralLeftReal", defaultSwerve);
     }
 
     private void configureBindings() {
@@ -97,33 +94,7 @@ public class RobotContainer {
         // var rightNeutralAuto = new PathPlannerAuto("NeutralRightAuto");
         // testAuto.event("shootAtHub").whileTrue(aimingSub.shootPhotonCommand());
 
-        primaryJoy.button(9).onTrue(new PathPlannerAuto("DepotLeftAuto"));
-
-        try {
-            primaryJoy
-                    .button(10)
-                    .and(inLeft)
-                    .and(inNeutralZone)
-                    .onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TrenchLIn")));
-            primaryJoy
-                    .button(10)
-                    .and(inLeft)
-                    .and(inNeutralZone.negate())
-                    .onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TrenchLOut")));
-            primaryJoy
-                    .button(10)
-                    .and(inLeft.negate())
-                    .and(inNeutralZone)
-                    .onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TrenchRIn")));
-            primaryJoy
-                    .button(10)
-                    .and(inLeft.negate())
-                    .and(inNeutralZone.negate())
-                    .onTrue(AutoBuilder.followPath(PathPlannerPath.fromPathFile("TrenchROut")));
-        } catch (FileVersionException | IOException | ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        primaryJoy.button(10).whileTrue(GoTo.trench(swerveDriveSubsystem));
 
         // primaryJoy.button(6).onTrue(new climbAuto(climbSubsystem, swerveDriveSubsystem));
 

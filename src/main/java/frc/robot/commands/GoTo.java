@@ -4,6 +4,7 @@ import static frc.robot.Constants.Vision.kTagLayout;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -12,6 +13,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.SwerveDriveSubsystem;
+import java.util.Set;
 
 public class GoTo {
 
@@ -50,6 +53,33 @@ public class GoTo {
         var offset = new Transform2d(1.5, 0, new Rotation2d()); // 67
         Pose2d infrontOfTag = tag.plus(offset).transformBy(rot180);
         return infrontOfTag;
+    }
+
+    public static Command trench(SwerveDriveSubsystem swerveSub) {
+        return Commands.defer(
+                () -> {
+                    Pose2d pose = Pose2d.kZero;
+                    if (swerveSub.inNeutralZone()) {
+                        if (swerveSub.inLeft()) {
+                            pose = new Pose2d(3.6, 7.426, new Rotation2d(Math.PI));
+                        } else {
+                            pose = new Pose2d(3.6, 0.624, new Rotation2d(Math.PI));
+                        }
+
+                    } else {
+                        if (swerveSub.inLeft()) {
+                            pose = new Pose2d(5.7, 7.426, new Rotation2d(0));
+                        } else {
+                            pose = new Pose2d(5.7, 0.624, new Rotation2d(0));
+                        }
+                    }
+
+                    if (getAlliance() == Alliance.Red) {
+                        FlippingUtil.flipFieldPose(pose);
+                    }
+                    return AutoBuilder.pathfindToPose(pose, constraints);
+                },
+                Set.of(swerveSub));
     }
 
     public static Command climbLineUp() {

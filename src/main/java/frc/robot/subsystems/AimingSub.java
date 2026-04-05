@@ -37,10 +37,10 @@ public class AimingSub extends SubsystemBase {
     private Translation2d blueHub = new Translation2d(kArenaBlueTransitionX, kArenaCenterY);
     private Translation2d redHub = new Translation2d(kArenaRedTransitionX, kArenaCenterY);
 
-    private Translation2d UphomeR = new Translation2d(11.4, 5.5);
-    private Translation2d DownhomeR = new Translation2d(11.4, 2.5);
-    private Translation2d UphomeB = new Translation2d(4, 5.5);
-    private Translation2d DownhomeB = new Translation2d(4, 2.5);
+    private Translation2d UphomeR = new Translation2d(12, 5.5);
+    private Translation2d DownhomeR = new Translation2d(12, 2.5);
+    private Translation2d UphomeB = new Translation2d(3.5, 5.5);
+    private Translation2d DownhomeB = new Translation2d(3.5, 2.5);
 
     public Distance robotToHubDistancePhoton;
     public Rotation2d turretAnglePhoton;

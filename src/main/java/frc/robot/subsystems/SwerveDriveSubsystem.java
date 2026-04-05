@@ -52,9 +52,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     // field angle at which joystick considers forward
     private Rotation2d joystickForwardAngle = Rotation2d.kZero;
 
-    public NTDouble speedReductonWhenShooting = new NTDouble(.5, "Swerve/SpeedReductionWhenShooting");
+    public NTDouble speedReductonWhenShooting = new NTDouble(.6, "Swerve/SpeedReductionWhenShooting");
     public NTDouble maxVelociyWhenShooting = new NTDouble(1.2, "Swerve/MaxVelocityWhenShooting");
-    public NTDouble rotationReductionWhenShooting = new NTDouble(0.5, "Swerve/RotationReductionWhenShooting");
+    public NTDouble rotationReductionWhenShooting = new NTDouble(0.6, "Swerve/RotationReductionWhenShooting");
     public NTDouble maxRotationRateWhenShooting =
             new NTDouble(1.5, "Swerve/MaxRotationRateWhenShooting"); // radians/sec
 
@@ -178,7 +178,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 rotRateLimiter.calculate(rotPercent) * Constants.DriveConstants.kMaxAngularVelocityRadiansPerSecond;
 
         Translation2d translation = new Translation2d(xSpeed, ySpeed);
-        if (isShooting) {
+        if (isShooting && !inNeutralZone()) {
             translation = translation.times(speedReductonWhenShooting.get());
             if (translation.getNorm() > maxVelociyWhenShooting.get()) {
                 translation = translation.times(maxVelociyWhenShooting.get() / translation.getNorm());
