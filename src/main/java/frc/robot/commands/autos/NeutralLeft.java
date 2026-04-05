@@ -16,7 +16,7 @@ public class NeutralLeft extends SequentialCommandGroup {
     final IntakeSubsystem intakeSubsystem;
     final AimingSub aimingSub;
 
-    public NeutralLeft(Climb climb, SwerveDriveSubsystem swerveSubsystem, AimingSub aimingSub, IntakeSubsystem intakeSubsystem) {
+    public NeutralLeft(SwerveDriveSubsystem swerveSubsystem, AimingSub aimingSub, IntakeSubsystem intakeSubsystem) {
         this.swerveSubsystem = swerveSubsystem;
         this.aimingSub = aimingSub;
         this.intakeSubsystem = intakeSubsystem;

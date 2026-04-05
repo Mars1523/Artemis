@@ -16,7 +16,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DefaultSwerve;
 import frc.robot.commands.GoTo;
+import frc.robot.commands.autos.CenterShoot;
 import frc.robot.commands.autos.LeftDepot;
+import frc.robot.commands.autos.NeutralLeft;
+import frc.robot.commands.autos.NeutralRight;
 import frc.robot.subsystems.AimingSub;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
@@ -72,13 +75,13 @@ public class RobotContainer {
         Shuffleboard.getTab("auto").add(autoChooser);
         // autoChooser.addOption("Climb", new climbAuto(climbSubsystem, swerveDriveSubsystem));
         autoChooser.addOption("LeftDepotReal", new LeftDepot(swerveDriveSubsystem, intakeSubsystem, aimingSub));
-        autoChooser.addOption("NeutralLeftReal", defaultSwerve);
+        autoChooser.addOption("NeutralLeftReal", new NeutralLeft(swerveDriveSubsystem, aimingSub, intakeSubsystem));
+        autoChooser.addOption("NeutralRightReal", new NeutralRight(swerveDriveSubsystem, aimingSub, intakeSubsystem));
+        autoChooser.addOption("CenterShootReal", new CenterShoot(swerveDriveSubsystem, turretSubsystem, launcherSubsystem, intakeSubsystem));
     }
 
     private void configureBindings() {
 
-        var inNeutralZone = new Trigger(swerveDriveSubsystem::inNeutralZone);
-        var inLeft = new Trigger(swerveDriveSubsystem::inLeft);
         // todo: add climb (statud: done)
         // map primaryJoy 8 to climb up
         // map primaryJoy 7 to climb down
