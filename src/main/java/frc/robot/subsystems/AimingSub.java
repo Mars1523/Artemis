@@ -34,6 +34,10 @@ public class AimingSub extends SubsystemBase {
     private final double kArenaBlueTransitionX = 4.625594;
     private final double kArenaRedTransitionX = 11.915394;
 
+    // max distance allowed for shooting in meters
+    // note that the calibration started went up to 227 inches (5.77 meters)
+    private final double kMaxShootingDistance = 6.0;
+
     private Translation2d blueHub = new Translation2d(kArenaBlueTransitionX, kArenaCenterY);
     private Translation2d redHub = new Translation2d(kArenaRedTransitionX, kArenaCenterY);
 
@@ -44,6 +48,7 @@ public class AimingSub extends SubsystemBase {
 
     public Distance robotToHubDistancePhoton;
     public Rotation2d turretAnglePhoton;
+    public boolean isWithinMaxShootingDistance = false;
 
     public AimingSub(
             SwerveDriveSubsystem swerveDriveSubsystem,
@@ -75,16 +80,21 @@ public class AimingSub extends SubsystemBase {
     public Command shootPhotonCommand() {
         return run(() -> {
                     Logger.recordOutput("Aiming/RunningShootPhotonCommand", true);
-                    launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
-                    turretSubsystem.setTurretAngle(this.turretAnglePhoton);
-                    if (isAimingReady()) {
-                        launcherSubsystem.runFeed();
+                    if (this.isWithinMaxShootingDistance) {
+                        launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
+                        turretSubsystem.setTurretAngle(this.turretAnglePhoton);
+                        if (isAimingReady()) {
+                            launcherSubsystem.runFeed();
+                        } else {
+                            launcherSubsystem.stopFeed();
+                        }
                     } else {
-                        launcherSubsystem.stopFeed();
+                        launcherSubsystem.turnOff();
                     }
                     swerveDriveSubsystem.setIsShooting(true);
                 })
                 .finallyDo(() -> {
+                    Logger.recordOutput("Aiming/RunningShootPhotonCommand", false);
                     launcherSubsystem.turnOff();
                     swerveDriveSubsystem.setIsShooting(false);
                 });
@@ -154,7 +164,9 @@ public class AimingSub extends SubsystemBase {
         Distance robotToHubDistance = Meters.of(robotToHub.getNorm());
 
         this.robotToHubDistancePhoton = robotToHubDistance;
+        this.isWithinMaxShootingDistance = (robotToHubDistance.abs(Meters) < kMaxShootingDistance);
         Logger.recordOutput("Aiming/robotPoseToHubAngle", robotPoseToHubAngle.getRotations());
+        Logger.recordOutput("Aiming/isWithinMaxShootingDistance ", this.isWithinMaxShootingDistance);
         Logger.recordOutput(
                 "Aiming/minusRobotPoseToHubAngle",
                 robotPoseToHubAngle.unaryMinus().getRotations());
