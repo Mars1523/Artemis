@@ -80,17 +80,29 @@ public class AimingSub extends SubsystemBase {
     public Command shootPhotonCommand() {
         return run(() -> {
                     Logger.recordOutput("Aiming/RunningShootPhotonCommand", true);
-                    if (this.isWithinMaxShootingDistance) {
+                    // always set turret angle
+                    turretSubsystem.setTurretAngle(this.turretAnglePhoton);
+                    // always shoot if in neutral zone
+                    if(swerveDriveSubsystem.inNeutralZone()) {
+                        launcherSubsystem.runFeed();
                         launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
-                        turretSubsystem.setTurretAngle(this.turretAnglePhoton);
-                        if (isAimingReady()) {
-                            launcherSubsystem.runFeed();
+                    } else {
+                        // only call shootDistance if within shooting distance
+                        if(this.isWithinMaxShootingDistance) {
+                            launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
+                            // only run the feed if launcher and turret within tolerance
+                            if(isAimingReady()) {
+                                launcherSubsystem.runFeed();
+                            } else {
+                                launcherSubsystem.stopFeed();
+                            }
                         } else {
+                            // if not within shooting distance, don't run feed or launcher
+                            launcherSubsystem.turnOff();
                             launcherSubsystem.stopFeed();
                         }
-                    } else {
-                        launcherSubsystem.turnOff();
                     }
+                    // always slow the robot down
                     swerveDriveSubsystem.setIsShooting(true);
                 })
                 .finallyDo(() -> {
@@ -130,10 +142,10 @@ public class AimingSub extends SubsystemBase {
         Translation2d currCenterOffset = centerOffset.rotateBy(robotPoseAngle);
         Translation2d turretFieldPosition = robotFieldPosition.plus(currCenterOffset);
 
-        if (turretFieldPosition.getX() < 4.63 || turretFieldPosition.getX() > 11.91) {
-            targetPosition = getHubPos();
-        } else {
+        if(swerveDriveSubsystem.inNeutralZone()) {
             targetPosition = turretFieldPosition.getY() > 4.03 ? getUpHomePos() : getDownHomePos();
+        } else {
+            targetPosition = getHubPos();
         }
 
         Translation2d robotToHub = targetPosition.minus(turretFieldPosition);
