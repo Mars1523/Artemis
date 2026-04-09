@@ -1,13 +1,9 @@
 package frc.robot.commands.autos;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.GoTo;
 import frc.robot.subsystems.AimingSub;
-import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 
@@ -21,6 +17,8 @@ public class NeutralLeft extends SequentialCommandGroup {
         this.aimingSub = aimingSub;
         this.intakeSubsystem = intakeSubsystem;
 
-        addCommands(new ParallelCommandGroup(aimingSub.shootPhotonCommand().withTimeout(8), intakeSubsystem.runIntake()), new PathPlannerAuto("NeutralLeftAuto"));
+        addCommands(
+                new ParallelCommandGroup(aimingSub.shootPhotonCommand().withTimeout(8), intakeSubsystem.runIntake()),
+                new PathPlannerAuto("NeutralLeftAuto"));
     }
 }
