@@ -82,12 +82,12 @@ public class AimingSub extends SubsystemBase {
                     Logger.recordOutput("Aiming/RunningShootPhotonCommand", true);
                     // always set turret angle
                     turretSubsystem.setTurretAngle(this.turretAnglePhoton);
-                    // always shoot if in neutral zone
+                    // always run both feed and launcher if in neutral zone
                     if(swerveDriveSubsystem.inNeutralZone()) {
                         launcherSubsystem.runFeed();
                         launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
                     } else {
-                        // only call shootDistance if within shooting distance
+                        // only run launcher if within shooting distance
                         if(this.isWithinMaxShootingDistance) {
                             launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
                             // only run the feed if launcher and turret within tolerance
