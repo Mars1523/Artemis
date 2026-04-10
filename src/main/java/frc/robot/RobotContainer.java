@@ -6,7 +6,10 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.util.FlippingUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -51,6 +54,14 @@ public class RobotContainer {
 
     AimingSub aimingSub = new AimingSub(swerveDriveSubsystem, turretSubsystem, launcherSubsystem);
 
+    enum StartingPlace {
+        Left,
+        Right,
+        Center
+    }
+
+    SendableChooser<StartingPlace> poseChooser = new SendableChooser<>();
+
     public RobotContainer() {
         swerveDriveSubsystem.setDefaultCommand(defaultSwerve);
 
@@ -66,6 +77,15 @@ public class RobotContainer {
         NamedCommands.registerCommand("shootAtHomeCommand", aimingSub.shootPhotonCommand());
         NamedCommands.registerCommand("shootAtHubCommand", aimingSub.shootPhotonCommand());
         */
+
+        poseChooser.addOption("Left", StartingPlace.Left);
+        poseChooser.addOption("Center", StartingPlace.Center);
+        poseChooser.addOption("Right", StartingPlace.Right);
+
+        // sideChooser.addOption("Red", GoTo.side.Red);
+        // sideChooser.addOption("Blue", GoTo.side.Blue);
+        Shuffleboard.getTab("pose").add(poseChooser);
+
         configureAutos();
         configureBindings();
     }
@@ -129,6 +149,44 @@ public class RobotContainer {
                 turretSubsystem);
         commandXboxController.rightTrigger(0.05).whileTrue(rotateTurretCommand);
         commandXboxController.leftTrigger(0.05).whileTrue(rotateTurretCommand);
+
+        // adds offset to turret aiming logic
+        commandXboxController.rightBumper().onTrue(aimingSub.updateOffset(-0.5));
+        commandXboxController.leftBumper().onTrue(aimingSub.updateOffset(0.5));
+        commandXboxController.leftStick().onTrue(aimingSub.zeroOffset());
+    }
+
+    public void setStartingPose() {
+        var poseChooserState = poseChooser.getSelected();
+        var selectedStartingPose = poseChooserState == null ? StartingPlace.Center : poseChooserState;
+        if (GoTo.getAlliance() == Alliance.Red) {
+            switch (selectedStartingPose) {
+                case Left:
+                    swerveDriveSubsystem.resetOmetry(
+                            FlippingUtil.flipFieldPose(new Pose2d(3.651, 7.444, new Rotation2d().fromDegrees(180))));
+                    break;
+                case Center:
+                    swerveDriveSubsystem.resetOmetry(
+                            FlippingUtil.flipFieldPose(new Pose2d(3.522, 3.718, new Rotation2d().fromDegrees(-90))));
+                    break;
+                case Right:
+                    swerveDriveSubsystem.resetOmetry(
+                            FlippingUtil.flipFieldPose(new Pose2d(3.632, 0.634, new Rotation2d().fromDegrees(-90))));
+                    break;
+            }
+        } else {
+            switch (selectedStartingPose) {
+                case Left:
+                    swerveDriveSubsystem.resetOmetry(new Pose2d(3.651, 7.444, new Rotation2d().fromDegrees(180)));
+                    break;
+                case Center:
+                    swerveDriveSubsystem.resetOmetry(new Pose2d(3.522, 3.718, new Rotation2d().fromDegrees(-90)));
+                    break;
+                case Right:
+                    swerveDriveSubsystem.resetOmetry(new Pose2d(3.632, 0.634, new Rotation2d().fromDegrees(-90)));
+                    break;
+            }
+        }
     }
 
     public Command getAutonomousCommand() {

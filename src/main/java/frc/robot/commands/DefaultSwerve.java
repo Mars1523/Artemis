@@ -37,6 +37,11 @@ public class DefaultSwerve extends Command {
         var ySpeed = (MathUtil.applyDeadband(-joy.getX(), 0.1));
         var rot = (MathUtil.applyDeadband(-joy.getTwist(), 0.1));
 
+        // manual "stop rotating" button
+        if (joy.getRawButtonPressed(3)) {
+            rot = 0;
+        }
+
         // by multiplying both xSpeed and ySpeed by this number,
         // we effectively apply the signedPow(2) behavior to the overall speed
         // instead of xSpeed and ySpeed independently

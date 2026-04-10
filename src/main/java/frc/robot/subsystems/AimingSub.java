@@ -49,6 +49,7 @@ public class AimingSub extends SubsystemBase {
     public Distance robotToHubDistancePhoton;
     public Rotation2d turretAnglePhoton;
     public boolean isWithinMaxShootingDistance = false;
+    public Rotation2d offset = new Rotation2d().fromDegrees(0);
 
     public AimingSub(
             SwerveDriveSubsystem swerveDriveSubsystem,
@@ -81,7 +82,7 @@ public class AimingSub extends SubsystemBase {
         return run(() -> {
                     Logger.recordOutput("Aiming/RunningShootPhotonCommand", true);
                     // always set turret angle
-                    turretSubsystem.setTurretAngle(this.turretAnglePhoton);
+                    turretSubsystem.setTurretAngle(this.turretAnglePhoton.plus(offset));
                     // always run both feed and launcher if not shooting at hub
                     if (!isInHomeArea()) {
                         launcherSubsystem.runFeed();
@@ -132,6 +133,18 @@ public class AimingSub extends SubsystemBase {
         Translation2d downHomePos =
                 DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? DownhomeR : DownhomeB;
         return downHomePos;
+    }
+
+    public Command updateOffset(double degree) {
+        return run(() -> {
+            offset.plus(new Rotation2d().fromDegrees(degree));
+        });
+    }
+
+    public Command zeroOffset() {
+        return run(() -> {
+            offset = new Rotation2d().fromDegrees(0);
+        });
     }
 
     public boolean isInHomeArea() {

@@ -59,6 +59,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             new NTDouble(1.5, "Swerve/MaxRotationRateWhenShooting"); // radians/sec
 
     public SwerveDriveSubsystem() {
+
         // example code from yagsl: https://docs.yagsl.com/configuring-yagsl/code-setup
         File swerveConfigDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
         try {
@@ -67,6 +68,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+
+        swerveDrive.stopOdometryThread();
 
         // causes the robot to maintain its current heading if the rotation angle is small enough and the translation
         // speed is high enough
@@ -262,6 +265,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     //    swerveDrive.resetOdometry(pose);
     // }
 
+    public void resetOmetry(Pose2d pose) {
+        swerveDrive.resetOdometry(pose);
+    }
+
     public ChassisSpeeds getRobotVelocity() {
         return swerveDrive.getRobotVelocity();
     }
@@ -278,7 +285,21 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         Logger.recordOutput("Swerve/RobotVelocity", robotVelocity);
         Logger.recordOutput("Swerve/RobotSpeed", robotSpeed);
         Logger.recordOutput("Swerve/isShooting", isShooting);
+        // System.out.println(swerveDrive.getGyro().getRotation3d());
+        Logger.recordOutput("Swerve/gyroRawYaw", swerveDrive.getYaw());
+        Logger.recordOutput("Swerve/gyroRaw3d", swerveDrive.getGyro().getRawRotation3d());
     }
+    /*
+    public boolean areWeTilted(){
+        Rotation3d angle = swerveDrive.getGyroRotation3d();
+        double verticalAngle = angle.getMeasureX().plus(angle.getMeasureY());
+        if(verticalAngle > 0.2){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }*/
 
     public void acceptVisionData(Pose2d pose, double timestamp, Matrix<N3, N1> estimationStdDevs) {
         swerveDrive.addVisionMeasurement(pose, timestamp, estimationStdDevs);

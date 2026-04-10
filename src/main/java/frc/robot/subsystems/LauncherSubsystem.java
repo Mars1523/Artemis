@@ -220,7 +220,7 @@ public class LauncherSubsystem extends SubsystemBase {
         return run(() -> {
                     hopperMotor.set(kReverseHopperDuty);
                     turretFeedMotor.set(kReverseTurretFeedDuty);
-                    leftMotor.set(0);
+                    leftMotor.set(-0.3);
                 })
                 .finallyDo(() -> turnOff());
     }
@@ -258,7 +258,7 @@ public class LauncherSubsystem extends SubsystemBase {
         double a = -1.29e-06;
         double b = 9.63e-04;
         double c = 1.72e-02;
-        double d = 3.99e01 + 0.5;
+        double d = 3.99e01 + 1.5;
         double distanceInches = distance.abs(Inches);
         double launcherRps = a * Math.pow(distanceInches, 3) + b * Math.pow(distanceInches, 2) + c * distanceInches + d;
         return RotationsPerSecond.of(launcherRps);

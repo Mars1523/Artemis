@@ -24,7 +24,8 @@ public class CenterShoot extends SequentialCommandGroup {
 
         try {
             addCommands(
-                    AutoBuilder.followPath(PathPlannerPath.fromPathFile("CenterShootAutoPath")).withTimeout(3),
+                    AutoBuilder.followPath(PathPlannerPath.fromPathFile("CenterShootAutoPath"))
+                            .withTimeout(3),
                     intakeSubsystem.intakeDown().withTimeout(0.5),
                     new ParallelRaceGroup(aimingSub.shootPhotonCommand().withTimeout(10), intakeSubsystem.runIntake()));
 
