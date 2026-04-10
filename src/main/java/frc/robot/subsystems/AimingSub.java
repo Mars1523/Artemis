@@ -41,10 +41,10 @@ public class AimingSub extends SubsystemBase {
     private Translation2d blueHub = new Translation2d(kArenaBlueTransitionX, kArenaCenterY);
     private Translation2d redHub = new Translation2d(kArenaRedTransitionX, kArenaCenterY);
 
-    private Translation2d UphomeR = new Translation2d(12, 5.5);
-    private Translation2d DownhomeR = new Translation2d(12, 2.5);
-    private Translation2d UphomeB = new Translation2d(3.5, 5.5);
-    private Translation2d DownhomeB = new Translation2d(3.5, 2.5);
+    private Translation2d UphomeR = new Translation2d(14.3, 5.7);
+    private Translation2d DownhomeR = new Translation2d(14.3, 2.1);
+    private Translation2d UphomeB = new Translation2d(2.3, 5.7);
+    private Translation2d DownhomeB = new Translation2d(2.3, 2.1);
 
     public Distance robotToHubDistancePhoton;
     public Rotation2d turretAnglePhoton;
@@ -82,16 +82,16 @@ public class AimingSub extends SubsystemBase {
                     Logger.recordOutput("Aiming/RunningShootPhotonCommand", true);
                     // always set turret angle
                     turretSubsystem.setTurretAngle(this.turretAnglePhoton);
-                    // always run both feed and launcher if in neutral zone
-                    if(swerveDriveSubsystem.inNeutralZone()) {
+                    // always run both feed and launcher if not shooting at hub
+                    if (!isInHomeArea()) {
                         launcherSubsystem.runFeed();
                         launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
                     } else {
                         // only run launcher if within shooting distance
-                        if(this.isWithinMaxShootingDistance) {
+                        if (this.isWithinMaxShootingDistance) {
                             launcherSubsystem.shootDistance(this.robotToHubDistancePhoton);
                             // only run the feed if launcher and turret within tolerance
-                            if(isAimingReady()) {
+                            if (isAimingReady()) {
                                 launcherSubsystem.runFeed();
                             } else {
                                 launcherSubsystem.stopFeed();
@@ -134,6 +134,16 @@ public class AimingSub extends SubsystemBase {
         return downHomePos;
     }
 
+    public boolean isInHomeArea() {
+        boolean isRed = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red;
+        double xPosition = swerveDriveSubsystem.getPose().getX();
+        if (isRed) {
+            return (xPosition > 11.91);
+        } else {
+            return (xPosition < 4.63);
+        }
+    }
+
     @Override
     public void periodic() {
         Translation2d targetPosition;
@@ -142,10 +152,10 @@ public class AimingSub extends SubsystemBase {
         Translation2d currCenterOffset = centerOffset.rotateBy(robotPoseAngle);
         Translation2d turretFieldPosition = robotFieldPosition.plus(currCenterOffset);
 
-        if(swerveDriveSubsystem.inNeutralZone()) {
-            targetPosition = turretFieldPosition.getY() > 4.03 ? getUpHomePos() : getDownHomePos();
-        } else {
+        if (isInHomeArea()) {
             targetPosition = getHubPos();
+        } else {
+            targetPosition = turretFieldPosition.getY() > 4.03 ? getUpHomePos() : getDownHomePos();
         }
 
         Translation2d robotToHub = targetPosition.minus(turretFieldPosition);

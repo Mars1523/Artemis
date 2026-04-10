@@ -76,9 +76,7 @@ public class RobotContainer {
         autoChooser.addOption("LeftDepotReal", new LeftDepot(swerveDriveSubsystem, intakeSubsystem, aimingSub));
         autoChooser.addOption("NeutralLeftReal", new NeutralLeft(swerveDriveSubsystem, aimingSub, intakeSubsystem));
         autoChooser.addOption("NeutralRightReal", new NeutralRight(swerveDriveSubsystem, aimingSub, intakeSubsystem));
-        autoChooser.addOption(
-                "CenterShootReal",
-                new CenterShoot(swerveDriveSubsystem, turretSubsystem, launcherSubsystem, intakeSubsystem));
+        autoChooser.addOption("CenterShootReal", new CenterShoot(swerveDriveSubsystem, aimingSub, intakeSubsystem));
     }
 
     private void configureBindings() {

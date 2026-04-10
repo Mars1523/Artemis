@@ -175,6 +175,7 @@ public class PhotonCameraSubsystem extends SubsystemBase {
 
         if (DriverStation.isDisabled()) {
             curStdDevs = VecBuilder.fill(0, 0, 0);
+            return;
         }
 
         if (estimatedPose.isEmpty()) {

@@ -63,6 +63,8 @@ public class IntakeSubsystem extends SubsystemBase {
             intakeArmConfig.closedLoop.p(newP);
             intakeArm.configure(intakeArmConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         });
+
+        armController.setSetpoint(kIntakeArmAbsoluteUpSetpoint, ControlType.kPosition);
     }
 
     public Command runIntake() {

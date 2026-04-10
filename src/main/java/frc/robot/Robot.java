@@ -33,6 +33,12 @@ public class Robot extends LoggedRobot {
         // for advantagekit
         Logger.start();
 
+        // log which commands are being run
+        CommandScheduler.getInstance().onCommandInitialize((command) -> Logger.recordOutput("Commands/Initialize", command.getName()));
+        CommandScheduler.getInstance().onCommandExecute((command) -> Logger.recordOutput("Commands/Execute", command.getName()));
+        CommandScheduler.getInstance().onCommandInterrupt((command) -> Logger.recordOutput("Commands/Interrupt", command.getName()));
+        CommandScheduler.getInstance().onCommandFinish((command) -> Logger.recordOutput("Commands/Finish", command.getName()));
+
         // logs motor data
         URCL.start();
 

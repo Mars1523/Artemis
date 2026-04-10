@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5731777777777776,
-        "y": 7.465044444444444
+        "x": 3.650898716119829,
+        "y": 7.444336661911555
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.693788888888889,
-        "y": 7.474788888888888
+        "x": 4.771509827230941,
+        "y": 7.454081106355999
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.999544444444444,
-        "y": 7.357855555555556
+        "x": 6.173937232524963,
+        "y": 7.327888730385164
       },
       "prevControl": {
-        "x": 5.712737360261961,
-        "y": 7.551450337378732
+        "x": 5.82792107448991,
+        "y": 7.331060711640424
       },
       "nextControl": {
-        "x": 6.389322222222223,
-        "y": 7.0947555555555555
+        "x": 6.6200418608337275,
+        "y": 7.323799223331748
       },
       "isLocked": false,
       "linkedName": null
@@ -44,14 +44,23 @@
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 1.25,
+      "rotationDegrees": -90.0
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.7841191066997518,
+      "minWaypointRelativePos": 0.65,
       "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 0.7,
+        "maxVelocity": 0.6,
         "maxAcceleration": 1.7,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -63,20 +72,9 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "shootAtHub",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": 1.0128291694800808,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "shootAtHub"
-        }
-      }
-    },
-    {
       "name": "intakeDown",
       "waypointRelativePos": 0.8,
-      "endWaypointRelativePos": 1.682382133995037,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
@@ -86,9 +84,14 @@
     },
     {
       "name": "shootAtHub",
-      "waypointRelativePos": 1.0094530722484816,
-      "endWaypointRelativePos": 3.0,
-      "command": null
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": 2.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "shootAtHub"
+        }
+      }
     },
     {
       "name": "runIntake",
@@ -118,7 +121,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.60950657667517
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
