@@ -40,10 +40,10 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 public class SwerveDriveSubsystem extends SubsystemBase {
 
     // caps each max translational accelerations at 2 m/s^2
-    private final SlewRateLimiter xRateLimiter = new SlewRateLimiter(2);
-    private final SlewRateLimiter yRateLimiter = new SlewRateLimiter(2);
+    private final SlewRateLimiter xRateLimiter = new SlewRateLimiter(15);
+    private final SlewRateLimiter yRateLimiter = new SlewRateLimiter(15);
     // caps the max rotational acceleration at 2 rad/s^2
-    private final SlewRateLimiter rotRateLimiter = new SlewRateLimiter(2);
+    private final SlewRateLimiter rotRateLimiter = new SlewRateLimiter(15);
     private boolean isShooting = false;
 
     // yagsl controller
